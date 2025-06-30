@@ -1,8 +1,5 @@
 "use client";
 
-// import Link from "next/link";
-import * as React from "react";
-
 import { NavUser } from "$/components/ui/nav-user";
 import {
   Sidebar,
@@ -15,72 +12,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "$/components/ui/sidebar";
-import {
-  RiCalendar2Line,
-  RiKey2Line,
-  RiListCheck3,
-  RiMailLine,
-  RiSlowDownLine,
-  RiTaskLine,
-} from "@remixicon/react";
-
-export const data = {
-  user: {
-    name: "Nicolas Diotto",
-    email: "nicodiottodev@gmail.com",
-    avatar:
-      "https://avatars.githubusercontent.com/u/89016052?s=400&u=638d0a351e2a12409358ae553803b2f42e286411&v=4",
-  },
-  navMain: [
-    {
-      title: "funcionalidades",
-      icon: RiSlowDownLine,
-      url: "#emails",
-      items: [
-        {
-          title: "Emails",
-          singular: "Email",
-          article: "o",
-          url: "#emails",
-          icon: RiMailLine,
-        },
-        {
-          title: "Agenda",
-          singular: "Evento",
-          article: "o",
-          url: "#agenda",
-          icon: RiCalendar2Line,
-        },
-        {
-          title: "Anotações",
-          singular: "Anotação",
-          article: "a",
-          url: "#notes",
-          icon: RiListCheck3,
-        },
-        {
-          title: "Tarefas",
-          singular: "Tarefa",
-          article: "a",
-          url: "#tasks",
-          icon: RiTaskLine,
-        },
-        {
-          title: "Minhas Senhas",
-          singular: "Senha",
-          article: "a",
-          url: "#passwords",
-          icon: RiKey2Line,
-        },
-      ],
-    },
-  ],
-};
+import { useHash } from "$/hooks/use-hash";
+import { APP_SIDEBAR_DATA } from "$/utils/constants";
+import * as React from "react";
 
 function SidebarLogo() {
+  const { state } = useSidebar();
   return (
-    <div className="flex items-center gap-3 px-2 group-data-[collapsible=icon]:px-0 transition-[padding] duration-200 ease-in-out">
+    <div className="flex items-center group-data-[collapsible=icon]:px-0 transition-[padding] duration-200 ease-in-out">
       <div className="group/logo inline-flex">
         <span className="sr-only">Logo</span>
         <svg
@@ -139,46 +80,25 @@ function SidebarLogo() {
           </defs>
         </svg>
       </div>
-      <span
-        style={{
-          fontFamily: "JetBrains Mono, monospace",
-          fontWeight: 700,
-          fontSize: 22,
-          letterSpacing: "-0.5px",
-          color: "var(--color-primary, #6366F1)",
-        }}
-      >
-        Zenithly
-      </span>
+      {/* Show the logo text only when the sidebar is expanded */}
+      {state === `expanded` && (
+        <span className="font-jetbrains ml-3 font-bold text-[22px] tracking-[-0.5px] text-[color:var(--color-primary,_#6366F1)]">
+          Zenithly
+        </span>
+      )}
     </div>
   );
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [activeTab, setActiveTab] = React.useState<string | undefined>(
-    undefined
-  );
-  React.useEffect(() => {
-    let hash = window.location.hash || "#emails";
-    if (
-      (window.location.pathname === "/" || window.location.pathname === "") &&
-      !window.location.hash
-    ) {
-      window.location.hash = "#emails";
-      hash = "#emails";
-    }
-    setActiveTab(hash);
-    const onHashChange = () => setActiveTab(window.location.hash || "#emails");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  const [hash, setHash] = useHash("#emails");
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
-      <SidebarHeader className="h-16 max-md:mt-2 mb-2 justify-center">
+      <SidebarHeader className="h-16 max-md:mt-2 mb-2 ml-[-8px] justify-center">
         <SidebarLogo />
       </SidebarHeader>
       <SidebarContent className="-mt-2">
-        {data.navMain.map((group) => (
+        {[APP_SIDEBAR_DATA.navMain].map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel className="uppercase text-muted-foreground/65">
               {group.icon && (
@@ -198,7 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       asChild
                       className="group/menu-button group-data-[collapsible=icon]:px-[5px]! font-medium gap-3 h-9 [&>svg]:size-auto"
                       tooltip={item.title}
-                      isActive={activeTab === item.url}
+                      isActive={hash === item.url}
                     >
                       <button
                         type="button"
@@ -207,7 +127,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           if (typeof window !== "undefined") {
                             window.location.hash = item.url;
                           }
-                          setActiveTab(item.url);
+                          setHash(item.url);
                         }}
                       >
                         {item.icon && (
@@ -228,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={APP_SIDEBAR_DATA.user} />
       </SidebarFooter>
     </Sidebar>
   );
