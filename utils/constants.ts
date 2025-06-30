@@ -1,3 +1,4 @@
+import { TAppSidebar } from "$/schemas/app-sidebar";
 import {
   RiCalendar2Line,
   RiKey2Line,
@@ -7,7 +8,7 @@ import {
   RiTaskLine,
 } from "@remixicon/react";
 
-export const APP_SIDEBAR_DATA = {
+export const APP_SIDEBAR_DATA: TAppSidebar = {
   user: {
     name: "Nicolas Diotto",
     email: "nicodiottodev@gmail.com",
@@ -17,41 +18,41 @@ export const APP_SIDEBAR_DATA = {
   navMain: {
     title: "funcionalidades",
     icon: RiSlowDownLine,
-    url: "#emails",
+    hash: "#emails",
     items: [
       {
         title: "Emails",
         singular: "Email",
         article: "o",
-        url: "#emails",
+        hash: "#emails",
         icon: RiMailLine,
       },
       {
         title: "Agenda",
         singular: "Evento",
         article: "o",
-        url: "#agenda",
+        hash: "#agenda",
         icon: RiCalendar2Line,
       },
       {
         title: "Anotações",
         singular: "Anotação",
         article: "a",
-        url: "#notes",
+        hash: "#notes",
         icon: RiListCheck3,
       },
       {
         title: "Tarefas",
         singular: "Tarefa",
         article: "a",
-        url: "#tasks",
+        hash: "#tasks",
         icon: RiTaskLine,
       },
       {
         title: "Minhas Senhas",
         singular: "Senha",
         article: "a",
-        url: "#passwords",
+        hash: "#passwords",
         icon: RiKey2Line,
       },
     ],
