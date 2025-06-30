@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionButtons } from "$/components/ui/action-buttons";
-import { AppSidebar, data } from "$/components/ui/app-sidebar";
+import { AppSidebar } from "$/components/ui/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,26 +15,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "$/components/ui/sidebar";
-import React from "react";
+import { useHash } from "$/hooks/use-hash";
+import { APP_SIDEBAR_DATA } from "$/utils/constants";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = React.useState<string | undefined>(
-    undefined
-  );
-  React.useEffect(() => {
-    let hash = window.location.hash || "#emails";
-    if (
-      (window.location.pathname === "/" || window.location.pathname === "") &&
-      !window.location.hash
-    ) {
-      window.location.hash = "#emails";
-      hash = "#emails";
-    }
-    setActiveTab(hash);
-    const onHashChange = () => setActiveTab(window.location.hash || "#emails");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  const [hash, setHash] = useHash("#emails");
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -56,8 +41,8 @@ export default function Dashboard() {
                       <BreadcrumbItem>
                         <BreadcrumbPage>
                           {
-                            data.navMain[0].items.find(
-                              (i) => i.url === activeTab
+                            APP_SIDEBAR_DATA.navMain.items.find(
+                              (i) => i.url === hash
                             )?.title
                           }
                         </BreadcrumbPage>
