@@ -118,16 +118,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       asChild
                       className="group/menu-button group-data-[collapsible=icon]:px-[5px]! font-medium gap-3 h-9 [&>svg]:size-auto"
                       tooltip={item.title}
-                      isActive={hash === item.url}
+                      isActive={hash === item.hash}
                     >
                       <button
                         type="button"
                         className="w-full flex items-center gap-3 bg-transparent border-0 p-0 m-0 text-left"
                         onClick={() => {
                           if (typeof window !== "undefined") {
-                            window.location.hash = item.url;
+                            window.location.hash = item.hash;
                           }
-                          setHash(item.url);
+                          setHash(item.hash);
                         }}
                       >
                         {item.icon && (
