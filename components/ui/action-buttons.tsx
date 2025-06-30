@@ -1,6 +1,5 @@
 "use client";
 
-import { data } from "$/components/ui/app-sidebar";
 import { Button } from "$/components/ui/button";
 import {
   Tooltip,
@@ -8,28 +7,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "$/components/ui/tooltip";
+import { useHash } from "$/hooks/use-hash";
 import { useIsMobile } from "$/hooks/use-mobile";
+import { useMounted } from "$/hooks/use-mounted";
 import { cn } from "$/lib/utils";
+import { APP_SIDEBAR_DATA } from "$/utils/constants";
 import { RiAddLine } from "@remixicon/react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import React from "react";
 
 export function ActionButtons() {
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
+  const isMounted = useMounted();
   const isMobile = useIsMobile();
-  const [hash, setHash] = React.useState<string | undefined>(undefined);
-
-  React.useEffect(() => {
-    setDate(new Date());
-    setHash(window.location.hash || "#emails");
-    const onHashChange = () => setHash(window.location.hash || "#emails");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
-  if (!hash || !date) return null;
-
+  const [hash] = useHash("#emails");
+  if (!hash || !isMounted) return null;
+  const date = new Date();
   return (
     <div className="flex gap-3">
       <Button variant="outline" className="justify-start">
@@ -54,16 +46,26 @@ export function ActionButtons() {
               <span className="max-lg:sr-only">
                 Nov
                 {
-                  data.navMain[0].items.find((i) => i.url === hash)?.article
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                    ?.article
                 }{" "}
-                {data.navMain[0].items.find((i) => i.url === hash)?.singular}
+                {
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                    ?.singular
+                }
               </span>
             </Button>
           </TooltipTrigger>
           <TooltipContent className="lg:hidden" hidden={isMobile}>
-            Nov(
-            {data.navMain[0].items.find((i) => i.url === hash)?.article}){" "}
-            {data.navMain[0].items.find((i) => i.url === hash)?.singular}
+            Nov
+            {
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                ?.article
+            }{" "}
+            {
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                ?.singular
+            }
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
