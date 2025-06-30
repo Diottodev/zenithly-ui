@@ -16,10 +16,19 @@ import {
   SidebarTrigger,
 } from "$/components/ui/sidebar";
 import { useHash } from "$/hooks/use-hash";
+import { THashEnum } from "$/schemas/app-sidebar";
 import { APP_SIDEBAR_DATA } from "$/utils/constants";
+import { ComponentProps } from "react";
 
 export default function Dashboard() {
-  const [hash, setHash] = useHash("#emails");
+  const [hash] = useHash("#emails");
+  const actualHashRendered: Record<THashEnum, ComponentProps<any>> = {
+    "#emails": <div>Welcome to email</div>,
+    "#agenda": <div>Welcome to agenda</div>,
+    "#notes": <div>Welcome to notes</div>,
+    "#tasks": <div>Welcome to tasks</div>,
+    "#passwords": <div>Welcome to password</div>,
+  };
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -42,7 +51,7 @@ export default function Dashboard() {
                         <BreadcrumbPage>
                           {
                             APP_SIDEBAR_DATA.navMain.items.find(
-                              (i) => i.url === hash
+                              (i) => i.hash === hash
                             )?.title
                           }
                         </BreadcrumbPage>
@@ -55,15 +64,8 @@ export default function Dashboard() {
               <ActionButtons />
             </header>
             <div className="overflow-hidden">
-              <div className="grid auto-rows-min @2xl:grid-cols-2 *:-ms-px *:-mt-px -m-px">
-                <div className="flex flex-col gap-4 p-4 md:p-6 lg:p-8">
-                  <h1 className="text-2xl font-semibold">Dashboard</h1>
-                  <p className="text-muted-foreground">
-                    Welcome to your dashboard! Here you can manage your
-                    applications, view analytics, and access various features.
-                  </p>
-                </div>
-                {/* Additional content can go here */}
+              <div className="grid auto-rows-min @2xl:grid-cols-2 *:-ms-px">
+                {actualHashRendered[hash as THashEnum]}
               </div>
             </div>
           </div>
