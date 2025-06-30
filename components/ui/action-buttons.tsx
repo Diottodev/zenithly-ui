@@ -46,11 +46,11 @@ export function ActionButtons() {
               <span className="max-lg:sr-only">
                 Nov
                 {
-                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
                     ?.article
                 }{" "}
                 {
-                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
                     ?.singular
                 }
               </span>
@@ -59,11 +59,11 @@ export function ActionButtons() {
           <TooltipContent className="lg:hidden" hidden={isMobile}>
             Nov
             {
-              APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
                 ?.article
             }{" "}
             {
-              APP_SIDEBAR_DATA.navMain.items.find((i) => i.url === hash)
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
                 ?.singular
             }
           </TooltipContent>
