@@ -19,12 +19,14 @@ export const APP_SIDEBAR_DATA: TAppSidebar = {
     title: "funcionalidades",
     icon: RiSlowDownLine,
     hash: "#emails",
+    tab: "emails",
     items: [
       {
         title: "Emails",
         singular: "Email",
         article: "o",
         hash: "#emails",
+        tab: "emails",
         icon: RiMailLine,
       },
       {
@@ -32,6 +34,7 @@ export const APP_SIDEBAR_DATA: TAppSidebar = {
         singular: "Evento",
         article: "o",
         hash: "#agenda",
+        tab: "agenda",
         icon: RiCalendar2Line,
       },
       {
@@ -39,6 +42,7 @@ export const APP_SIDEBAR_DATA: TAppSidebar = {
         singular: "Anotação",
         article: "a",
         hash: "#notes",
+        tab: "notes",
         icon: RiListCheck3,
       },
       {
@@ -46,6 +50,7 @@ export const APP_SIDEBAR_DATA: TAppSidebar = {
         singular: "Tarefa",
         article: "a",
         hash: "#tasks",
+        tab: "tasks",
         icon: RiTaskLine,
       },
       {
@@ -53,6 +58,7 @@ export const APP_SIDEBAR_DATA: TAppSidebar = {
         singular: "Senha",
         article: "a",
         hash: "#passwords",
+        tab: "passwords",
         icon: RiKey2Line,
       },
     ],
