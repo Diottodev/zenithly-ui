@@ -1,10 +1,16 @@
-import { JetBrains_Mono } from "next/font/google";
+import { Toaster } from "$/components/ui/sonner";
+import { ThemeProvider } from "$/providers/theme-provider";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const JetBrainsMono = JetBrains_Mono({
+const fontSans = Geist({
+  variable: "--font-sans",
   subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
+});
+
+const fontMono = Geist_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
 });
 
 export default function RootLayout({
@@ -13,9 +19,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scheme-only-dark">
-      <body className={`${JetBrainsMono.className} font-sans antialiased`}>
-        {children}
+    <html
+      lang="pt-BR"
+      className="dark scheme-only-dark"
+      suppressHydrationWarning
+    >
+      <body
+        className={`${fontSans.variable} ${fontMono.variable} bg-sidebar font-sans antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
