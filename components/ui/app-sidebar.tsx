@@ -14,9 +14,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "$/components/ui/sidebar";
-import { useHash } from "$/hooks/use-hash";
+import { useTab } from "$/hooks/use-tab";
 import { APP_SIDEBAR_DATA } from "$/utils/constants";
-import * as React from "react";
 
 function SidebarLogo() {
   const { state } = useSidebar();
@@ -89,9 +88,10 @@ function SidebarLogo() {
     </div>
   );
 }
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [hash, setHash] = useHash("#emails");
+  const [tab, setTab] = useTab();
+  console.log("TAB:", tab);
+
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader className="h-16 max-md:mt-2 mb-2 ml-[-8px] justify-center">
@@ -118,17 +118,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       asChild
                       className="group/menu-button group-data-[collapsible=icon]:px-[5px]! font-medium gap-3 h-9 [&>svg]:size-auto"
                       tooltip={item.title}
-                      isActive={hash === item.hash}
+                      isActive={tab === item.tab}
                     >
                       <button
                         type="button"
                         className="w-full flex items-center gap-3 bg-transparent border-0 p-0 m-0 text-left"
-                        onClick={() => {
-                          if (typeof window !== "undefined") {
-                            window.location.hash = item.hash;
-                          }
-                          setHash(item.hash);
-                        }}
+                        onClick={() => setTab(item.tab)}
                       >
                         {item.icon && (
                           <item.icon
