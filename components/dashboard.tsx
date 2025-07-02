@@ -1,7 +1,8 @@
 "use client";
 
-import { ActionButtons } from "$/components/ui/action-buttons";
-import { AppSidebar } from "$/components/ui/app-sidebar";
+import Agenda from "$/components/agenda";
+import { AppSidebar } from "$/components/ui";
+import ActionButtons from "$/components/ui/action-buttons";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,19 +16,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "$/components/ui/sidebar";
-import { useHash } from "$/hooks/use-hash";
-import { THashEnum } from "$/schemas/app-sidebar";
+import { useTab } from "$/hooks/use-tab";
 import { APP_SIDEBAR_DATA } from "$/utils/constants";
-import { ComponentProps } from "react";
 
 export default function Dashboard() {
-  const [hash] = useHash("#emails");
-  const actualHashRendered: Record<THashEnum, ComponentProps<any>> = {
-    "#emails": <div>Welcome to email</div>,
-    "#agenda": <div>Welcome to agenda</div>,
-    "#notes": <div>Welcome to notes</div>,
-    "#tasks": <div>Welcome to tasks</div>,
-    "#passwords": <div>Welcome to password</div>,
+  const [tab] = useTab();
+  const actualTabRendered: Record<string, React.ReactNode> = {
+    emails: <div>Welcome to email</div>,
+    agenda: <Agenda />,
+    notes: <div>Welcome to notes</div>,
+    tasks: <div>Welcome to tasks</div>,
+    passwords: <div>Welcome to password</div>,
   };
   return (
     <SidebarProvider>
@@ -51,7 +50,7 @@ export default function Dashboard() {
                         <BreadcrumbPage>
                           {
                             APP_SIDEBAR_DATA.navMain.items.find(
-                              (i) => i.hash === hash
+                              (i) => i.tab === tab
                             )?.title
                           }
                         </BreadcrumbPage>
@@ -60,14 +59,9 @@ export default function Dashboard() {
                   </Breadcrumb>
                 </div>
               </div>
-              {/* Right side */}
               <ActionButtons />
             </header>
-            <div className="overflow-hidden">
-              <div className="grid auto-rows-min @2xl:grid-cols-2 *:-ms-px">
-                {actualHashRendered[hash as THashEnum]}
-              </div>
-            </div>
+            <div className="overflow-hidden">{actualTabRendered[tab]}</div>
           </div>
         </div>
       </SidebarInset>
