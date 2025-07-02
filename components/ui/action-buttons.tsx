@@ -1,29 +1,31 @@
 "use client";
 
 import { Button } from "$/components/ui/button";
+import ThemeToggle from "$/components/ui/theme-toggle";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "$/components/ui/tooltip";
-import { useHash } from "$/hooks/use-hash";
 import { useIsMobile } from "$/hooks/use-mobile";
 import { useMounted } from "$/hooks/use-mounted";
+import { useTab } from "$/hooks/use-tab";
 import { cn } from "$/lib/utils";
 import { APP_SIDEBAR_DATA } from "$/utils/constants";
 import { RiAddLine } from "@remixicon/react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
-export function ActionButtons() {
+function ActionButtons() {
   const isMounted = useMounted();
   const isMobile = useIsMobile();
-  const [hash] = useHash("#emails");
-  if (!hash || !isMounted) return null;
+  const [tab] = useTab();
+  if (!tab || !isMounted) return null;
   const date = new Date();
   return (
     <div className="flex gap-3">
+      <ThemeToggle />
       <Button variant="outline" className="justify-start">
         <CalendarIcon
           size={18}
@@ -46,11 +48,11 @@ export function ActionButtons() {
               <span className="max-lg:sr-only">
                 Nov
                 {
-                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.tab === tab)
                     ?.article
                 }{" "}
                 {
-                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
+                  APP_SIDEBAR_DATA.navMain.items.find((i) => i.tab === tab)
                     ?.singular
                 }
               </span>
@@ -59,11 +61,10 @@ export function ActionButtons() {
           <TooltipContent className="lg:hidden" hidden={isMobile}>
             Nov
             {
-              APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
-                ?.article
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.tab === tab)?.article
             }{" "}
             {
-              APP_SIDEBAR_DATA.navMain.items.find((i) => i.hash === hash)
+              APP_SIDEBAR_DATA.navMain.items.find((i) => i.tab === tab)
                 ?.singular
             }
           </TooltipContent>
@@ -72,3 +73,5 @@ export function ActionButtons() {
     </div>
   );
 }
+
+export default ActionButtons;
