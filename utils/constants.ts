@@ -1,4 +1,4 @@
-import { TAppSidebar } from "$/schemas/app-sidebar";
+import { TAppSidebar } from "$/types/app-sidebar";
 import {
   RiCalendar2Line,
   RiKey2Line,
