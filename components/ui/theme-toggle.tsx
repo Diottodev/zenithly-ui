@@ -1,57 +1,73 @@
 "use client";
 
-import { RiMoonClearLine, RiSunLine } from "@remixicon/react";
+import { useMounted } from "$/hooks/use-mounted";
+import { RiMoonFill, RiSunFill } from "@remixicon/react";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { useId, useState } from "react";
 
+/**
+ * ThemeToggle is a switch component for toggling between light and dark themes.
+ * It uses the `next-themes` package to manage theme state and supports system preference.
+ * The toggle is animated using Framer Motion.
+ */
 export default function ThemeToggle() {
-  const id = useId();
-  const { theme, setTheme } = useTheme();
-  const [system, setSystem] = useState(false);
-
-  const smartToggle = () => {
-    const prefersDarkScheme = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+  // Get theme state and setter from next-themes
+  const { theme, setTheme, systemTheme } = useTheme();
+  // Ensure component is mounted before rendering (avoids hydration mismatch)
+  const mounted = useMounted();
+  if (!mounted) return null;
+  // Determine the current theme, resolving "system" to the actual system theme
+  const currentTheme = theme === "system" ? systemTheme ?? "light" : theme;
+  const isLight = currentTheme === "light";
+  /**
+   * Toggles the theme between light and dark.
+   * If the theme is set to "system", it toggles based on the current system theme.
+   */
+  const toggleTheme = () => {
     if (theme === "system") {
-      setTheme(prefersDarkScheme ? "light" : "dark");
-      setSystem(false);
-    } else if (
-      (theme === "light" && !prefersDarkScheme) ||
-      (theme === "dark" && prefersDarkScheme)
-    ) {
-      setTheme(theme === "light" ? "dark" : "light");
-      setSystem(false);
+      const prefersDark = systemTheme === "dark";
+      setTheme(prefersDark ? "light" : "dark");
     } else {
-      setTheme("system");
-      setSystem(true);
+      setTheme(theme === "light" ? "dark" : "light");
     }
   };
-
   return (
-    <div className="flex flex-col justify-center">
+    <label className="relative inline-block">
       <input
         type="checkbox"
-        name="theme-toggle"
-        id={id}
+        role="switch"
+        aria-checked={isLight}
+        aria-label="Toggle theme"
+        checked={isLight}
+        onChange={toggleTheme}
         className="peer sr-only"
-        checked={system}
-        onChange={smartToggle}
-        aria-label="Toggle dark mode"
       />
-      <label
-        className="text-muted-foreground/80 hover:text-foreground/80 rounded peer-focus-visible:border-ring peer-focus-visible:ring-ring/50 relative inline-flex size-8 cursor-pointer items-center justify-center transition-[color,box-shadow] outline-none peer-focus-visible:ring-[3px]"
-        htmlFor={id}
-        aria-hidden="true"
+      <motion.div
+        className="relative flex h-9 w-16 items-center rounded-3xl p-2 transition-colors duration-500 cursor-pointer border border-input bg-secondary/32 shadow-xs hover:bg-secondary/64 hover:text-accent-foreground"
+        whileTap={{ scale: 1 }}
       >
-        <RiSunLine className="dark:hidden" size={20} aria-hidden="true" />
-        <RiMoonClearLine
-          className="hidden dark:block"
-          size={20}
-          aria-hidden="true"
-        />
-        <span className="sr-only">Switch to system/light/dark version</span>
-      </label>
-    </div>
+        {/* Animated knob that slides left/right depending on theme */}
+        <motion.div
+          className={`z-10 flex h-7 w-7 p-1 items-center justify-center rounded-full ${
+            isLight
+              ? "bg-foreground text-background"
+              : "bg-foreground text-background"
+          } shadow-xs`}
+          animate={{ x: isLight ? 0 : 23 }}
+          transition={{
+            type: "spring",
+            stiffness: 600,
+            damping: 80,
+          }}
+        >
+          {/* Icon changes based on theme */}
+          {isLight ? (
+            <RiSunFill className="h-4 w-4" />
+          ) : (
+            <RiMoonFill className="h-4 w-4" />
+          )}
+        </motion.div>
+      </motion.div>
+    </label>
   );
 }
