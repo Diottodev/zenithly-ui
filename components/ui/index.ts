@@ -1,6 +1,7 @@
 "use client";
 
 export { AgendaView } from "$/components/ui/agenda-view";
+export { AnimatedCard } from "$/components/ui/animated-card";
 export { AppSidebar } from "$/components/ui/app-sidebar";
 export {
   CalendarDndProvider,
