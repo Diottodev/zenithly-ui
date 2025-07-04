@@ -35,14 +35,21 @@ export default function NotFound() {
         </CardHeader>
         <CardContent className="space-y-6 pt-2">
           <div className="space-y-3">
-            <Button asChild className="w-full group transition-all duration-200 hover:scale-[1.02]">
-              <Link href="/auth#signin">
+            <Button
+              asChild
+              className="w-full group transition-all duration-200 hover:scale-[1.02]"
+            >
+              <Link href="/auth/signin">
                 <LogIn className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
                 Fazer Login
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full group transition-all duration-200 hover:scale-[1.02]">
-              <Link href="/auth#signup">
+            <Button
+              asChild
+              variant="outline"
+              className="w-full group transition-all duration-200 hover:scale-[1.02]"
+            >
+              <Link href="/auth/signup">
                 <UserPlus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                 Criar Conta
               </Link>
@@ -57,7 +64,11 @@ export default function NotFound() {
                 </span>
               </div>
             </div>
-            <Button asChild variant="ghost" className="w-full group transition-all duration-200 hover:scale-[1.02]">
+            <Button
+              asChild
+              variant="ghost"
+              className="w-full group transition-all duration-200 hover:scale-[1.02]"
+            >
               <Link href="/">
                 <Home className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                 Voltar ao Início
@@ -66,7 +77,8 @@ export default function NotFound() {
           </div>
           <div className="pt-4 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
-              Se você acredita que isso é um erro, entre em contato com o suporte.
+              Se você acredita que isso é um erro, entre em contato com o
+              suporte.
             </p>
           </div>
         </CardContent>
