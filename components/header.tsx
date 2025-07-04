@@ -21,7 +21,6 @@ import { CalendarIcon } from "lucide-react";
 export default function Header() {
   const isMounted = useMounted();
   const [tab] = useTab();
-  if (!tab) return null;
   if (!tab || !isMounted) return null;
   const date = new Date();
   return (
@@ -48,7 +47,7 @@ export default function Header() {
           </Breadcrumb>
         </div>
       </div>
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-center">
         <Button variant="outline" className="justify-start">
           <CalendarIcon
             size={18}
