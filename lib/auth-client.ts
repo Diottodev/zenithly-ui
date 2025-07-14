@@ -1,24 +1,22 @@
-import { inferAdditionalFields } from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/react";
+import useSWR from 'swr'
 
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
-  plugins: [
-    inferAdditionalFields<{
-      role: string;
-    }>(),
-  ],
-});
+const fetcher = async () => {
+  try {
+    return await fetch('http://localhost:8080/auth/session')
+      .then((res) => res.json())
+      .then((data) => data.user)
+  } catch {
+    return null
+  }
+}
 
-export const {
-  signIn,
-  signUp,
-  signOut,
-  useSession,
-  getSession,
-  resetPassword,
-  sendVerificationEmail,
-  forgetPassword,
-  changePassword,
-  updateUser,
-} = authClient;
+export const useSession = () => {
+  const {
+    data: user,
+    isLoading: isPending,
+    error,
+  } = useSWR('profile', fetcher, {
+    revalidateOnFocus: false,
+  })
+  return { data: { user }, isPending, error }
+}
