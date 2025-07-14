@@ -1,30 +1,30 @@
-import { Toaster } from "$/components/ui/sonner";
-import { AuthProvider } from "$/providers/auth-provider";
-import { ThemeProvider } from "$/providers/theme-provider";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { Toaster } from '$/components/ui/sonner'
+// import { AuthProvider } from "$/providers/auth-provider";
+import { ThemeProvider } from '$/providers/theme-provider'
+import { Geist, Geist_Mono } from 'next/font/google'
+import './globals.css'
 
 const fontSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+  variable: '--font-sans',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 const fontMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
+  variable: '--font-mono',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
-      lang="pt-BR"
       className="dark scheme-only-dark"
+      lang="pt-BR"
       suppressHydrationWarning
     >
       <body
@@ -33,13 +33,13 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
-          enableSystem
           disableTransitionOnChange
+          enableSystem
         >
-          <AuthProvider>{children}</AuthProvider>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
