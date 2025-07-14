@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { useMounted } from "$/hooks/use-mounted";
-import { RiMoonFill, RiSunFill } from "@remixicon/react";
-import { motion } from "framer-motion";
-import { useTheme } from "next-themes";
+import { useMounted } from '$/hooks/use-mounted'
+import { RiMoonFill, RiSunFill } from '@remixicon/react'
+import { motion } from 'framer-motion'
+import { useTheme } from 'next-themes'
 
 /**
  * ThemeToggle is a switch component for toggling between light and dark themes.
@@ -12,50 +12,52 @@ import { useTheme } from "next-themes";
  */
 export default function ThemeToggle() {
   // Get theme state and setter from next-themes
-  const { theme, setTheme, systemTheme } = useTheme();
+  const { theme, setTheme, systemTheme } = useTheme()
   // Ensure component is mounted before rendering (avoids hydration mismatch)
-  const mounted = useMounted();
-  if (!mounted) return null;
+  const mounted = useMounted()
+  if (!mounted) {
+    return null
+  }
   // Determine the current theme, resolving "system" to the actual system theme
-  const currentTheme = theme === "system" ? systemTheme ?? "light" : theme;
-  const isLight = currentTheme === "light";
+  const currentTheme = theme === 'system' ? (systemTheme ?? 'light') : theme
+  const isLight = currentTheme === 'light'
   /**
    * Toggles the theme between light and dark.
    * If the theme is set to "system", it toggles based on the current system theme.
    */
   const toggleTheme = () => {
-    if (theme === "system") {
-      const prefersDark = systemTheme === "dark";
-      setTheme(prefersDark ? "light" : "dark");
+    if (theme === 'system') {
+      const prefersDark = systemTheme === 'dark'
+      setTheme(prefersDark ? 'light' : 'dark')
     } else {
-      setTheme(theme === "light" ? "dark" : "light");
+      setTheme(theme === 'light' ? 'dark' : 'light')
     }
-  };
+  }
   return (
     <label className="relative inline-block">
       <input
-        type="checkbox"
-        role="switch"
         aria-checked={isLight}
         aria-label="Toggle theme"
         checked={isLight}
-        onChange={toggleTheme}
         className="peer sr-only"
+        onChange={toggleTheme}
+        role="switch"
+        type="checkbox"
       />
       <motion.div
-        className="relative flex h-9 w-16 items-center rounded-3xl p-2 transition-colors duration-500 cursor-pointer border border-input bg-secondary/32 shadow-xs hover:bg-secondary/64 hover:text-accent-foreground"
+        className="relative flex h-9 w-16 cursor-pointer items-center rounded-3xl border border-input bg-secondary/32 p-2 shadow-xs transition-colors duration-500 hover:bg-secondary/64 hover:text-accent-foreground"
         whileTap={{ scale: 1 }}
       >
         {/* Animated knob that slides left/right depending on theme */}
         <motion.div
-          className={`z-10 flex h-7 w-7 p-1 items-center justify-center rounded-full ${
-            isLight
-              ? "bg-foreground text-background"
-              : "bg-foreground text-background"
-          } shadow-xs`}
           animate={{ x: isLight ? 0 : 23 }}
+          className={`z-10 flex h-7 w-7 items-center justify-center rounded-full p-1 ${
+            isLight
+              ? 'bg-foreground text-background'
+              : 'bg-foreground text-background'
+          } shadow-xs`}
           transition={{
-            type: "spring",
+            type: 'spring',
             stiffness: 600,
             damping: 80,
           }}
@@ -69,5 +71,5 @@ export default function ThemeToggle() {
         </motion.div>
       </motion.div>
     </label>
-  );
+  )
 }
