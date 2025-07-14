@@ -1,5 +1,31 @@
-"use client";
+'use client'
 
+import {
+  AgendaDaysToShow,
+  AgendaView,
+  CalendarDndProvider,
+  type CalendarEvent,
+  type CalendarView,
+  DayView,
+  EventDialog,
+  EventGap,
+  EventHeight,
+  MonthView,
+  WeekCellsHeight,
+  WeekView,
+} from '$/components/ui'
+import { Button } from '$/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '$/components/ui/dropdown-menu'
+import { SidebarTrigger, useSidebar } from '$/components/ui/sidebar'
+import { cn } from '$/lib/utils'
+import type { TCalendarEvent } from '$/types/google-calendar'
+import { addHoursToDate } from '$/utils/add-hours-to-date'
 import {
   addDays,
   addMonths,
@@ -10,56 +36,29 @@ import {
   startOfWeek,
   subMonths,
   subWeeks,
-} from "date-fns";
-import { ptBR } from "date-fns/locale";
+} from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { useCalendarContext } from "./calendar-context";
-
-import {
-  AgendaDaysToShow,
-  AgendaView,
-  CalendarDndProvider,
-  CalendarEvent,
-  CalendarView,
-  DayView,
-  EventDialog,
-  EventGap,
-  EventHeight,
-  MonthView,
-  WeekCellsHeight,
-  WeekView,
-} from "$/components/ui";
-import { Button } from "$/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "$/components/ui/dropdown-menu";
-import { SidebarTrigger, useSidebar } from "$/components/ui/sidebar";
-import { cn } from "$/lib/utils";
-import { TCalendarEvent } from "$/types/google-calendar";
-import { addHoursToDate } from "$/utils/add-hours-to-date";
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { useCalendarContext } from './calendar-context'
 
 // Utility functions to convert between TCalendarEvent and CalendarEvent
 const convertTCalendarEventToCalendarEvent = (
   event: TCalendarEvent
 ): CalendarEvent => {
-  console.log(event._color, "COLLORR"); // Debug log
+  console.log(event._color, 'COLLORR') // Debug log
   // Ensure _color is always defined
 
-  const dateStart = String(event.start.dateTime || event.start.date);
-  const dateEnd = String(event.end.dateTime || event.end.date);
+  const dateStart = String(event.start.dateTime || event.start.date)
+  const dateEnd = String(event.end.dateTime || event.end.date)
   return {
     id: event.id,
-    title: event.summary || "Sem título",
+    title: event.summary || 'Sem título',
     description: event.description,
     start: new Date(dateStart),
     end: new Date(dateEnd),
@@ -67,18 +66,18 @@ const convertTCalendarEventToCalendarEvent = (
     location: event.location,
     // Default color since TCalendarEvent doesn't have color
     _color: event._color as { background: string; foreground: string }, // Ensure color is always defined
-  };
-};
+  }
+}
 
 const convertCalendarEventToTCalendarEvent = (
   event: CalendarEvent
 ): TCalendarEvent => {
-  const now = new Date().toISOString();
+  const now = new Date().toISOString()
   return {
     id: event.id,
-    kind: "calendar#event",
-    status: "confirmed",
-    htmlLink: "",
+    kind: 'calendar#event',
+    status: 'confirmed',
+    htmlLink: '',
     summary: event.title,
     description: event.description,
     location: event.location,
@@ -91,25 +90,25 @@ const convertCalendarEventToTCalendarEvent = (
     created: now,
     updated: now,
     creator: {
-      email: "",
-      displayName: "User",
+      email: '',
+      displayName: 'User',
       self: true,
     },
     organizer: {
-      email: "",
-      displayName: "User",
+      email: '',
+      displayName: 'User',
       self: true,
     },
-  };
-};
+  }
+}
 
 export interface EventCalendarProps {
-  events?: TCalendarEvent[];
-  onEventAdd?: (event: TCalendarEvent) => void;
-  onEventUpdate?: (event: TCalendarEvent) => void;
-  onEventDelete?: (eventId: string) => void;
-  className?: string;
-  initialView?: CalendarView;
+  events?: TCalendarEvent[]
+  onEventAdd?: (event: TCalendarEvent) => void
+  onEventUpdate?: (event: TCalendarEvent) => void
+  onEventDelete?: (eventId: string) => void
+  className?: string
+  initialView?: CalendarView
 }
 
 export function EventCalendar({
@@ -118,19 +117,17 @@ export function EventCalendar({
   onEventUpdate,
   onEventDelete,
   className,
-  initialView = "month",
+  initialView = 'month',
 }: EventCalendarProps) {
   // Convert TCalendarEvent[] to CalendarEvent[] for internal use
-  const internalEvents = events.map(convertTCalendarEventToCalendarEvent);
+  const internalEvents = events.map(convertTCalendarEventToCalendarEvent)
 
   // Use the shared calendar context instead of local state
-  const { currentDate, setCurrentDate } = useCalendarContext();
-  const [view, setView] = useState<CalendarView>(initialView);
-  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
-  );
-  const { open } = useSidebar();
+  const { currentDate, setCurrentDate } = useCalendarContext()
+  const [view, setView] = useState<CalendarView>(initialView)
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const { open } = useSidebar()
 
   // Add keyboard shortcuts for view switching
   useEffect(() => {
@@ -143,251 +140,254 @@ export function EventCalendar({
         e.target instanceof HTMLTextAreaElement ||
         (e.target instanceof HTMLElement && e.target.isContentEditable)
       ) {
-        return;
+        return
       }
 
       switch (e.key.toLowerCase()) {
-        case "m":
-          setView("month");
-          break;
-        case "w":
-          setView("week");
-          break;
-        case "d":
-          setView("day");
-          break;
-        case "a":
-          setView("agenda");
-          break;
+        case 'm':
+          setView('month')
+          break
+        case 'w':
+          setView('week')
+          break
+        case 'd':
+          setView('day')
+          break
+        case 'a':
+          setView('agenda')
+          break
+        default:
+          // Do nothing for other keys
+          break
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isEventDialogOpen]);
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isEventDialogOpen])
 
   const handlePrevious = () => {
-    if (view === "month") {
-      setCurrentDate(subMonths(currentDate, 1));
-    } else if (view === "week") {
-      setCurrentDate(subWeeks(currentDate, 1));
-    } else if (view === "day") {
-      setCurrentDate(addDays(currentDate, -1));
-    } else if (view === "agenda") {
+    if (view === 'month') {
+      setCurrentDate(subMonths(currentDate, 1))
+    } else if (view === 'week') {
+      setCurrentDate(subWeeks(currentDate, 1))
+    } else if (view === 'day') {
+      setCurrentDate(addDays(currentDate, -1))
+    } else if (view === 'agenda') {
       // For agenda view, go back 30 days (a full month)
-      setCurrentDate(addDays(currentDate, -AgendaDaysToShow));
+      setCurrentDate(addDays(currentDate, -AgendaDaysToShow))
     }
-  };
+  }
 
   const handleNext = () => {
-    if (view === "month") {
-      setCurrentDate(addMonths(currentDate, 1));
-    } else if (view === "week") {
-      setCurrentDate(addWeeks(currentDate, 1));
-    } else if (view === "day") {
-      setCurrentDate(addDays(currentDate, 1));
-    } else if (view === "agenda") {
+    if (view === 'month') {
+      setCurrentDate(addMonths(currentDate, 1))
+    } else if (view === 'week') {
+      setCurrentDate(addWeeks(currentDate, 1))
+    } else if (view === 'day') {
+      setCurrentDate(addDays(currentDate, 1))
+    } else if (view === 'agenda') {
       // For agenda view, go forward 30 days (a full month)
-      setCurrentDate(addDays(currentDate, AgendaDaysToShow));
+      setCurrentDate(addDays(currentDate, AgendaDaysToShow))
     }
-  };
+  }
 
   const handleToday = () => {
-    setCurrentDate(new Date());
-  };
+    setCurrentDate(new Date())
+  }
 
   const handleEventSelect = (event: CalendarEvent) => {
-    console.log("Event selected:", event); // Debug log
-    setSelectedEvent(event);
-    setIsEventDialogOpen(true);
-  };
+    console.log('Event selected:', event) // Debug log
+    setSelectedEvent(event)
+    setIsEventDialogOpen(true)
+  }
 
   const handleEventCreate = (startTime: Date) => {
-    console.log("Creating new event at:", startTime); // Debug log
+    console.log('Creating new event at:', startTime) // Debug log
     // Snap to 15-minute intervals
-    const minutes = startTime.getMinutes();
-    const remainder = minutes % 15;
+    const minutes = startTime.getMinutes()
+    const remainder = minutes % 15
     if (remainder !== 0) {
       if (remainder < 7.5) {
         // Round down to nearest 15 min
-        startTime.setMinutes(minutes - remainder);
+        startTime.setMinutes(minutes - remainder)
       } else {
         // Round up to nearest 15 min
-        startTime.setMinutes(minutes + (15 - remainder));
+        startTime.setMinutes(minutes + (15 - remainder))
       }
-      startTime.setSeconds(0);
-      startTime.setMilliseconds(0);
+      startTime.setSeconds(0)
+      startTime.setMilliseconds(0)
     }
 
     const newEvent: CalendarEvent = {
-      id: "",
-      title: "",
+      id: '',
+      title: '',
       start: startTime,
       end: addHoursToDate(startTime, 1),
       allDay: false,
-    };
-    setSelectedEvent(newEvent);
-    setIsEventDialogOpen(true);
-  };
+    }
+    setSelectedEvent(newEvent)
+    setIsEventDialogOpen(true)
+  }
 
   const handleEventSave = (event: CalendarEvent) => {
     if (event.id) {
-      onEventUpdate?.(convertCalendarEventToTCalendarEvent(event));
+      onEventUpdate?.(convertCalendarEventToTCalendarEvent(event))
       // Show toast notification when an event is updated
       toast(`Evento "${event.title}" atualizado`, {
-        description: format(new Date(event.start), "dd/MM/yyyy", {
+        description: format(new Date(event.start), 'dd/MM/yyyy', {
           locale: ptBR,
         }),
-        position: "bottom-left",
-      });
+        position: 'bottom-left',
+      })
     } else {
       const newCalendarEvent = {
         ...event,
         id: Math.random().toString(36).substring(2, 11),
-      };
-      onEventAdd?.(convertCalendarEventToTCalendarEvent(newCalendarEvent));
+      }
+      onEventAdd?.(convertCalendarEventToTCalendarEvent(newCalendarEvent))
       // Show toast notification when an event is added
       toast(`Evento "${event.title}" adicionado`, {
-        description: format(new Date(event.start), "dd/MM/yyyy", {
+        description: format(new Date(event.start), 'dd/MM/yyyy', {
           locale: ptBR,
         }),
-        position: "bottom-left",
-      });
+        position: 'bottom-left',
+      })
     }
-    setIsEventDialogOpen(false);
-    setSelectedEvent(null);
-  };
+    setIsEventDialogOpen(false)
+    setSelectedEvent(null)
+  }
 
   const handleEventDelete = (eventId: string) => {
-    const deletedEvent = events.find((e) => e.id === eventId);
-    onEventDelete?.(eventId);
-    setIsEventDialogOpen(false);
-    setSelectedEvent(null);
+    const deletedEvent = events.find((e) => e.id === eventId)
+    onEventDelete?.(eventId)
+    setIsEventDialogOpen(false)
+    setSelectedEvent(null)
 
     // Show toast notification when an event is deleted
     if (deletedEvent) {
-      toast(`Evento "${deletedEvent.summary || "Sem título"}" excluído`, {
+      toast(`Evento "${deletedEvent.summary || 'Sem título'}" excluído`, {
         description: format(
           new Date(
             String(deletedEvent.start.dateTime || deletedEvent.start.date)
           ),
-          "dd/MM/yyyy",
+          'dd/MM/yyyy',
           {
             locale: ptBR,
           }
         ),
-        position: "bottom-left",
-      });
+        position: 'bottom-left',
+      })
     }
-  };
+  }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    onEventUpdate?.(convertCalendarEventToTCalendarEvent(updatedEvent));
+    onEventUpdate?.(convertCalendarEventToTCalendarEvent(updatedEvent))
     // Show toast notification when an event is updated via drag and drop
     toast(`Evento "${updatedEvent.title}" movido`, {
-      description: format(new Date(updatedEvent.start), "dd/MM/yyyy", {
+      description: format(new Date(updatedEvent.start), 'dd/MM/yyyy', {
         locale: ptBR,
       }),
-      position: "bottom-left",
-    });
-  };
+      position: 'bottom-left',
+    })
+  }
 
   const viewTitle = useMemo(() => {
-    if (view === "month") {
-      return format(currentDate, "MMMM yyyy", { locale: ptBR });
-    } else if (view === "week") {
-      const start = startOfWeek(currentDate, { weekStartsOn: 0 });
-      const end = endOfWeek(currentDate, { weekStartsOn: 0 });
+    if (view === 'month') {
+      return format(currentDate, 'MMMM yyyy', { locale: ptBR })
+    }
+    if (view === 'week') {
+      const start = startOfWeek(currentDate, { weekStartsOn: 0 })
+      const end = endOfWeek(currentDate, { weekStartsOn: 0 })
       if (isSameMonth(start, end)) {
-        return format(start, "MMMM yyyy", { locale: ptBR });
-      } else {
-        return `${format(start, "MMM")} - ${format(end, "MMM yyyy", {
-          locale: ptBR,
-        })}`;
+        return format(start, 'MMMM yyyy', { locale: ptBR })
       }
-    } else if (view === "day") {
+      return `${format(start, 'MMM')} - ${format(end, 'MMM yyyy', {
+        locale: ptBR,
+      })}`
+    }
+    if (view === 'day') {
       return (
         <>
-          <span className="min-sm:hidden" aria-hidden="true">
-            {format(currentDate, "dd/MM/yyyy", { locale: ptBR })}
+          <span aria-hidden="true" className="min-sm:hidden">
+            {format(currentDate, 'dd/MM/yyyy', { locale: ptBR })}
           </span>
-          <span className="max-sm:hidden min-md:hidden" aria-hidden="true">
-            {format(currentDate, "dd/MM/yyyy", { locale: ptBR })}
+          <span aria-hidden="true" className="max-sm:hidden min-md:hidden">
+            {format(currentDate, 'dd/MM/yyyy', { locale: ptBR })}
           </span>
           <span className="max-md:hidden">
-            {format(currentDate, "dd/MM/yyyy", { locale: ptBR })}
+            {format(currentDate, 'dd/MM/yyyy', { locale: ptBR })}
           </span>
         </>
-      );
-    } else if (view === "agenda") {
+      )
+    }
+    if (view === 'agenda') {
       // Show the month range for agenda view
-      const start = currentDate;
-      const end = addDays(currentDate, AgendaDaysToShow - 1);
+      const start = currentDate
+      const end = addDays(currentDate, AgendaDaysToShow - 1)
 
       if (isSameMonth(start, end)) {
-        return format(start, "MMMM yyyy", { locale: ptBR });
-      } else {
-        return `${format(start, "MMM")} - ${format(end, "MMM yyyy", {
-          locale: ptBR,
-        })}`;
+        return format(start, 'MMMM yyyy', { locale: ptBR })
       }
-    } else {
-      return format(currentDate, "MMMM yyyy", { locale: ptBR });
+      return `${format(start, 'MMM')} - ${format(end, 'MMM yyyy', {
+        locale: ptBR,
+      })}`
     }
-  }, [currentDate, view]);
+    return format(currentDate, 'MMMM yyyy', { locale: ptBR })
+  }, [currentDate, view])
 
   return (
     <div
-      className="flex has-data-[slot=month-view]:flex-1 flex-col rounded-lg"
+      className="flex flex-col rounded-lg has-data-[slot=month-view]:flex-1"
       style={
         {
-          "--event-height": `${EventHeight}px`,
-          "--event-gap": `${EventGap}px`,
-          "--week-cells-height": `${WeekCellsHeight}px`,
+          '--event-height': `${EventHeight}px`,
+          '--event-gap': `${EventGap}px`,
+          '--week-cells-height': `${WeekCellsHeight}px`,
         } as React.CSSProperties
       }
     >
       <CalendarDndProvider onEventUpdateAction={handleEventUpdate}>
         <div
           className={cn(
-            "flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-5 sm:px-4",
+            'flex flex-col justify-between gap-2 py-5 sm:flex-row sm:items-center sm:px-4',
             className
           )}
         >
-          <div className="flex sm:flex-col max-sm:items-center justify-between gap-1.5">
+          <div className="flex justify-between gap-1.5 max-sm:items-center sm:flex-col">
             <div className="flex items-center gap-1.5">
               <SidebarTrigger
-                data-state={open ? "invisible" : "visible"}
-                className="peer size-7 text-muted-foreground/80 hover:text-foreground/80 hover:bg-transparent! sm:-ms-1.5 lg:data-[state=invisible]:opacity-0 lg:data-[state=invisible]:pointer-events-none transition-opacity ease-in-out duration-200"
+                className="peer sm:-ms-1.5 size-7 text-muted-foreground/80 transition-opacity duration-200 ease-in-out hover:bg-transparent! hover:text-foreground/80 lg:data-[state=invisible]:pointer-events-none lg:data-[state=invisible]:opacity-0"
+                data-state={open ? 'invisible' : 'visible'}
               />
-              <h2 className="font-semibold text-xl lg:peer-data-[state=invisible]:-translate-x-7.5 transition-transform ease-in-out duration-300">
+              <h2 className="lg:peer-data-[state=invisible]:-translate-x-7.5 font-semibold text-xl transition-transform duration-300 ease-in-out">
                 {viewTitle.toString().toLowerCase()}
               </h2>
             </div>
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center sm:gap-2 max-sm:order-1">
+              <div className="flex items-center max-sm:order-1 sm:gap-2">
                 <Button
-                  variant="ghost"
-                  size="icon"
+                  aria-label="Previous"
                   className="max-sm:size-8"
                   onClick={handlePrevious}
-                  aria-label="Previous"
+                  size="icon"
+                  variant="ghost"
                 >
-                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                  <ChevronLeftIcon aria-hidden="true" size={16} />
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="icon"
+                  aria-label="Next"
                   className="max-sm:size-8"
                   onClick={handleNext}
-                  aria-label="Next"
+                  size="icon"
+                  variant="ghost"
                 >
-                  <ChevronRightIcon size={16} aria-hidden="true" />
+                  <ChevronRightIcon aria-hidden="true" size={16} />
                 </Button>
               </div>
               <Button
@@ -399,48 +399,49 @@ export function EventCalendar({
             </div>
             <div className="flex items-center justify-between gap-2">
               <Button
-                variant="outline"
                 className="max-sm:h-8 max-sm:px-2.5!"
                 onClick={() => {
-                  setSelectedEvent(null); // Ensure we're creating a new event
-                  setIsEventDialogOpen(true);
+                  setSelectedEvent(null) // Ensure we're creating a new event
+                  setIsEventDialogOpen(true)
                 }}
+                variant="outline"
               >
                 Novo evento
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
+                    className="gap-1.5 max-sm:h-8 max-sm:gap-1 max-sm:px-2!"
                     variant="outline"
-                    className="gap-1.5 max-sm:h-8 max-sm:px-2! max-sm:gap-1"
                   >
                     <span className="capitalize">
-                      {view === "month"
-                        ? "Mês"
-                        : view === "week"
-                        ? "Semana"
-                        : view === "day"
-                        ? "Dia"
-                        : "Agenda"}
+                      {
+                        {
+                          month: 'Mês',
+                          week: 'Semana',
+                          day: 'Dia',
+                          agenda: 'Agenda',
+                        }[view]
+                      }
                     </span>
                     <ChevronDownIcon
+                      aria-hidden="true"
                       className="-me-1 opacity-60"
                       size={16}
-                      aria-hidden="true"
                     />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-32">
-                  <DropdownMenuItem onClick={() => setView("month")}>
+                  <DropdownMenuItem onClick={() => setView('month')}>
                     Mês <DropdownMenuShortcut>M</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView("week")}>
+                  <DropdownMenuItem onClick={() => setView('week')}>
                     Semana <DropdownMenuShortcut>W</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView("day")}>
+                  <DropdownMenuItem onClick={() => setView('day')}>
                     Dia <DropdownMenuShortcut>D</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView("agenda")}>
+                  <DropdownMenuItem onClick={() => setView('agenda')}>
                     Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -450,31 +451,31 @@ export function EventCalendar({
         </div>
 
         <div className="flex flex-1 flex-col">
-          {view === "month" && (
+          {view === 'month' && (
             <MonthView
               currentDate={currentDate}
               events={internalEvents}
-              onEventSelectAction={handleEventSelect}
               onEventCreateAction={handleEventCreate}
+              onEventSelectAction={handleEventSelect}
             />
           )}
-          {view === "week" && (
+          {view === 'week' && (
             <WeekView
               currentDate={currentDate}
               events={internalEvents}
-              onEventSelectAction={handleEventSelect}
               onEventCreateAction={handleEventCreate}
+              onEventSelectAction={handleEventSelect}
             />
           )}
-          {view === "day" && (
+          {view === 'day' && (
             <DayView
               currentDate={currentDate}
               events={internalEvents}
-              onEventSelectAction={handleEventSelect}
               onEventCreateAction={handleEventCreate}
+              onEventSelectAction={handleEventSelect}
             />
           )}
-          {view === "agenda" && (
+          {view === 'agenda' && (
             <AgendaView
               currentDate={currentDate}
               events={internalEvents}
@@ -487,13 +488,13 @@ export function EventCalendar({
           event={selectedEvent}
           isOpen={isEventDialogOpen}
           onCloseAction={() => {
-            setIsEventDialogOpen(false);
-            setSelectedEvent(null);
+            setIsEventDialogOpen(false)
+            setSelectedEvent(null)
           }}
-          onSaveAction={handleEventSave}
           onDeleteAction={handleEventDelete}
+          onSaveAction={handleEventSave}
         />
       </CalendarDndProvider>
     </div>
-  );
+  )
 }

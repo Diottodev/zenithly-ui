@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { etiquettes } from "$/components/ui/big-calendar";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { etiquettes } from '$/components/ui/big-calendar';
+import { createContext, type ReactNode, useContext, useState } from 'react';
 
 interface CalendarContextType {
   // Date management
@@ -21,7 +21,7 @@ export function useCalendarContext() {
   const context = useContext(CalendarContext);
   if (context === undefined) {
     throw new Error(
-      "useCalendarContext must be used within a CalendarProvider"
+      'useCalendarContext must be used within a CalendarProvider'
     );
   }
   return context;
@@ -45,14 +45,15 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     setVisibleColors((prev) => {
       if (prev.includes(color)) {
         return prev.filter((c) => c !== color);
-      } else {
-        return [...prev, color];
       }
+      return [...prev, color];
     });
   };
   // Check if a color is visible
   const isColorVisible = (color: string | undefined) => {
-    if (!color) return true; // Events without a color are always visible
+    if (!color) {
+      return true; // Events without a color are always visible
+    }
     return visibleColors.includes(color);
   };
 
