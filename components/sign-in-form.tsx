@@ -1,99 +1,125 @@
-"use client";
+'use client'
 
-import { AnimatedCard } from "$/components/ui/animated-card";
-import { Button } from "$/components/ui/button";
-import { CardContent, CardHeader, CardTitle } from "$/components/ui/card";
-import { Icons } from "$/components/ui/icons";
-import { Input } from "$/components/ui/input";
-import { Label } from "$/components/ui/label";
-import Logo from "$/components/ui/logo";
-import { signIn } from "$/lib/auth-client";
-import React from "react";
-import { toast } from "sonner";
+import { AnimatedCard } from '$/components/ui/animated-card'
+import { Button } from '$/components/ui/button'
+import { CardContent, CardHeader, CardTitle } from '$/components/ui/card'
+import { Icons } from '$/components/ui/icons'
+import { Input } from '$/components/ui/input'
+import { Label } from '$/components/ui/label'
+import Logo from '$/components/ui/logo'
+import { signIn } from '$/lib/better-auth-client'
+import React from 'react'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 export function SignInForm() {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const router = useRouter()
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
+  const [loading, setLoading] = React.useState(false)
+
   const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
     try {
       const result = await signIn.email({
         email,
         password,
-      });
+      })
+
       if (result.error) {
-        toast.error("Erro ao fazer login", {
-          description: result.error.message,
-        });
-        return;
+        throw new Error(result.error.message || 'Erro ao fazer login')
       }
-      toast.success("Login realizado com sucesso!");
-      window.location.href = "/dashboard";
+
+      if (!result.data?.user) {
+        throw new Error('Usuário não encontrado')
+      }
+
+      toast.success('Login realizado com sucesso!')
+      router.push('/dashboard')
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Erro interno do servidor");
+      toast.error('Erro ao fazer login', {
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-  const handleSocialLogin = async (provider: "github" | "google") => {
-    setLoading(true);
+  }
+
+  const handleGitHubLogin = async () => {
+    setLoading(true)
     try {
       await signIn.social({
-        provider,
-        callbackURL: "/dashboard",
-      });
-      toast.success(`Login com ${provider} realizado com sucesso!`);
+        provider: 'github',
+        callbackURL: '/auth/callback',
+      })
     } catch (error) {
-      console.error("Social login error:", error);
-      toast.error("Erro ao fazer login com " + provider);
-      setLoading(false);
+      toast.error('Erro ao fazer login com GitHub', {
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
+      })
+      setLoading(false)
     }
-  };
+  }
+
+  const handleGoogleLogin = async () => {
+    setLoading(true)
+    try {
+      await signIn.social({
+        provider: 'google',
+        callbackURL: '/auth/callback',
+      })
+    } catch (error) {
+      toast.error('Erro ao fazer login com Google', {
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
+      })
+      setLoading(false)
+    }
+  }
   return (
-    <AnimatedCard className="w-full max-w-md mx-auto">
+    <AnimatedCard className="mx-auto w-full max-w-md">
       <CardHeader className="inline-flex items-center justify-center space-x-2">
         <Logo />
-        <CardTitle className="text-2xl font-bold text-center">
+        <CardTitle className="text-center font-bold text-2xl">
           Entrar na Zenithly
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleEmailLogin}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
               disabled={loading}
+              id="email"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+              type="email"
+              value={email}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
               disabled={loading}
+              id="password"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              type="password"
+              value={password}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button className="w-full" disabled={loading} type="submit">
             {loading ? (
               <>
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 Entrando...
               </>
             ) : (
-              "Entrar"
+              'Entrar'
             )}
           </Button>
         </form>
@@ -109,32 +135,32 @@ export function SignInForm() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Button
-            variant="outline"
-            onClick={() => handleSocialLogin("github")}
             disabled={loading}
+            onClick={() => handleGitHubLogin()}
+            variant="outline"
           >
             <Icons.gitHub className="mr-2 h-4 w-4" />
             GitHub
           </Button>
           <Button
-            variant="outline"
-            onClick={() => handleSocialLogin("google")}
             disabled={loading}
+            onClick={() => handleGoogleLogin()}
+            variant="outline"
           >
             <Icons.google className="mr-2 h-4 w-4" />
             Google
           </Button>
         </div>
-        <div className="text-center text-sm text-muted-foreground">
-          Não tem uma conta?{" "}
+        <div className="text-center text-muted-foreground text-sm">
+          Não tem uma conta?{' '}
           <a
-            href="/auth/signup"
             className="underline underline-offset-4 hover:text-primary"
+            href="/auth/signup"
           >
             Criar conta
           </a>
         </div>
       </CardContent>
     </AnimatedCard>
-  );
+  )
 }
