@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { EndHour, StartHour } from "$/components/ui/constants";
-import { endOfWeek, isSameDay, isWithinInterval, startOfWeek } from "date-fns";
-import React from "react";
+import { EndHour, StartHour } from '$/components/ui/constants'
+import { endOfWeek, isSameDay, isWithinInterval, startOfWeek } from 'date-fns'
+import React from 'react'
 
 /**
  * Hook that calculates the position of the current time in a calendar view (24-hour format).
@@ -23,45 +23,45 @@ import React from "react";
  */
 export function useCurrentTimeIndicator(
   currentDate: Date,
-  view: "day" | "week"
+  view: 'day' | 'week'
 ): { currentTimePosition: number; currentTimeVisible: boolean } {
   const [currentTimePosition, setCurrentTimePosition] =
-    React.useState<number>(0);
+    React.useState<number>(0)
   const [currentTimeVisible, setCurrentTimeVisible] =
-    React.useState<boolean>(false);
+    React.useState<boolean>(false)
   React.useEffect(() => {
     const calculateTimePosition = () => {
-      const now = new Date();
+      const now = new Date()
       // 24h format: calculates minutes since StartHour
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const totalMinutes = (hours - StartHour) * 60 + minutes;
-      const dayStartMinutes = 0;
-      const dayEndMinutes = (EndHour - StartHour) * 60;
+      const hours = now.getHours()
+      const minutes = now.getMinutes()
+      const totalMinutes = (hours - StartHour) * 60 + minutes
+      const dayStartMinutes = 0
+      const dayEndMinutes = (EndHour - StartHour) * 60
       // Ensures that the position is between 0 and 100
-      const clampedMinutes = Math.max(0, Math.min(totalMinutes, dayEndMinutes));
+      const clampedMinutes = Math.max(0, Math.min(totalMinutes, dayEndMinutes))
       const position =
-        (clampedMinutes / (dayEndMinutes - dayStartMinutes)) * 100;
+        (clampedMinutes / (dayEndMinutes - dayStartMinutes)) * 100
       // Check if current day is in view based on the calendar view
-      let isCurrentTimeVisible = false;
-      if (view === "day") {
-        isCurrentTimeVisible = isSameDay(now, currentDate);
-      } else if (view === "week") {
-        const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 0 });
-        const endOfWeekDate = endOfWeek(currentDate, { weekStartsOn: 0 });
+      let isCurrentTimeVisible = false
+      if (view === 'day') {
+        isCurrentTimeVisible = isSameDay(now, currentDate)
+      } else if (view === 'week') {
+        const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 0 })
+        const endOfWeekDate = endOfWeek(currentDate, { weekStartsOn: 0 })
         isCurrentTimeVisible = isWithinInterval(now, {
           start: startOfWeekDate,
           end: endOfWeekDate,
-        });
+        })
       }
-      setCurrentTimePosition(position);
-      setCurrentTimeVisible(isCurrentTimeVisible);
-    };
+      setCurrentTimePosition(position)
+      setCurrentTimeVisible(isCurrentTimeVisible)
+    }
     // Calculate immediately
-    calculateTimePosition();
+    calculateTimePosition()
     // Update every minute
-    const interval = setInterval(calculateTimePosition, 60000);
-    return () => clearInterval(interval);
-  }, [currentDate, view]);
-  return { currentTimePosition, currentTimeVisible };
+    const interval = setInterval(calculateTimePosition, 60_000)
+    return () => clearInterval(interval)
+  }, [currentDate, view])
+  return { currentTimePosition, currentTimeVisible }
 }

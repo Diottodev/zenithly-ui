@@ -1,22 +1,27 @@
-import { useAuthStore } from "$/stores/auth-store";
-import type { TAuthStore } from "$/types/auth";
+import { useSession } from '$/lib/auth-client'
 
 /**
  * Hook to access authentication state and actions
  *
- * @returns {TAuthStore} Authentication state and actions
+ * @returns Authentication state and actions
  *
  * @example
  * ```typescript
- * const { user, isAuthenticated, setUser, reset } = useAuth();
+ * const { data: session, isPending, error } = useAuth();
  *
  * // Check if user is authenticated
- * if (isAuthenticated) {
- * console.log('User logged in:', user.name);
+ * if (session?.user) {
+ *   console.log('User logged in:', session.user.name);
  * }
- *
  * ```
  */
-export const useAuth = (): TAuthStore => {
-  return useAuthStore();
-};
+export const useAuth = () => {
+  const { data: session, isPending, error } = useSession()
+  return {
+    user: session?.user || null,
+    session,
+    isLoading: isPending,
+    isAuthenticated: !!session?.user,
+    error,
+  }
+}
