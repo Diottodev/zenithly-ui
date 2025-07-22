@@ -12,7 +12,7 @@ import { useTabStore } from './tab-context'
  * const [tab, setTab] = useTab();
  * setTab('settings');
  */
-export function useTab(defaultTab = 'emails'): [string, (tab: string) => void] {
+export function useTab(defaultTab: string = 'emails'): [string, (tab: string) => void] {
   const { tab, setTab } = useTabStore()
   // Get the current tab from the URL or use the default
   const getCurrentTab = React.useCallback(() => {

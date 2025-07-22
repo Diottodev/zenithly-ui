@@ -16,10 +16,11 @@
  */
 export function getBorderRadiusClasses(
   isFirstDay: boolean,
-  isLastDay: boolean
+  isLastDay: boolean,
+  allDay: boolean = false
 ): string {
-  if (isFirstDay && isLastDay) {
-    return "rounded"; // Both ends rounded
+  if ((isFirstDay && isLastDay) || allDay) {
+    return "rounded-sm"; // Both ends rounded
   } else if (isFirstDay) {
     return "rounded-l rounded-r-none not-in-data-[slot=popover-content]:w-[calc(100%+5px)]"; // Only left end rounded
   } else if (isLastDay) {

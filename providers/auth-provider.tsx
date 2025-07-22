@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from '$/lib/auth-client'
+import { useAuth, type TAuthUser } from '$/hooks/use-auth'
 import { useAuthStore } from '$/stores/auth-store'
 import React from 'react'
 
@@ -17,13 +17,17 @@ export function AuthProvider({
 }: {
   children: React.ReactNode
 }): React.JSX.Element {
-  const { data: session, isPending } = useSession()
+  const { session, isPending } = useAuth()
   const { setUser, setLoading } = useAuthStore()
   React.useEffect(() => {
     setLoading(isPending)
   }, [isPending, setLoading])
   React.useEffect(() => {
-    setUser(session ? session.user : null)
-  }, [session?.user, setUser, session])
+    return setUser(
+      session && typeof session === 'object' && 'user' in session
+        ? (session as { user: TAuthUser }).user
+        : null
+    )
+  }, [session, setUser])
   return <>{children}</>
 }

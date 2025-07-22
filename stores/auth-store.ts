@@ -1,28 +1,22 @@
-import { TAuthStore } from "$/types/auth";
-import { create } from "zustand";
+import { create } from 'zustand'
 
-/**
- * Store Zustand to manage authentication state
- *
- * @example
- * ```typescript
- * const { user, isAuthenticated, setUser } = useAuthStore();
- * ```
- */
-export const useAuthStore = create<TAuthStore>((set) => ({
+type TUser = {
+  id: string
+  name: string
+  email: string
+  image: string | null
+}
+
+type TAuthStoreState = {
+  user: TUser | null
+  loading: boolean
+  setUser: (user: TUser | null) => void
+  setLoading: (loading: boolean) => void
+}
+
+export const useAuthStore = create<TAuthStoreState>((set) => ({
   user: null,
-  isLoading: true,
-  isAuthenticated: false,
-  setUser: (user) =>
-    set({
-      user,
-      isAuthenticated: !!user,
-    }),
-  setLoading: (isLoading) => set({ isLoading }),
-  reset: () =>
-    set({
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-    }),
-}));
+  loading: true,
+  setUser: (user) => set({ user }),
+  setLoading: (loading) => set({ loading }),
+}))

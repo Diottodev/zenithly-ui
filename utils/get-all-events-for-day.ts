@@ -33,14 +33,20 @@ export function getAllEventsForDay(
   day: Date
 ): TCalendarEvent[] {
   return events.filter((event) => {
-    const dateStart = String(event.start.dateTime || event.start.date);
-    const dateEnd = String(event.end.dateTime || event.end.date);
+    const dateStart = String(event.start.date || event.start.dateTime);
+    const dateEnd = String(event.end.date || event.end.dateTime);
     const eventStart = new Date(dateStart);
     const eventEnd = new Date(dateEnd);
     return (
-      isSameDay(day, eventStart) ||
-      isSameDay(day, eventEnd) ||
-      (day > eventStart && day < eventEnd)
+      day.getDate() === eventStart.getDate() &&
+      day.getMonth() === eventStart.getMonth() &&
+      day.getFullYear() === eventStart.getFullYear() ||
+      day.getDate() === eventEnd.getDate() &&
+      day.getMonth() === eventEnd.getMonth() &&
+      day.getFullYear() === eventEnd.getFullYear() ||
+      (eventStart < day && eventEnd > day) ||
+      isSameDay(eventStart, day) ||
+      isSameDay(eventEnd, day)
     );
   });
 }

@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export type TArticleEnum = "a" | "o";
 
 export type THashEnum =
@@ -13,7 +15,7 @@ export type TNavItem = {
   article: TArticleEnum;
   hash: THashEnum;
   tab: string;
-  icon: any;
+  icon: ReactNode;
 };
 
 export type TAppSidebar = {
@@ -24,7 +26,7 @@ export type TAppSidebar = {
   };
   navMain: {
     title: string;
-    icon: any;
+    icon: ReactNode;
     hash: THashEnum;
     tab: string;
     items: TNavItem[];

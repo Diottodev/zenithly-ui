@@ -26,7 +26,6 @@ export type TAuthFormState = {
   currentForm: TAuthFormType | undefined;
   setCurrentForm: (form: TAuthFormType) => void;
   toggleForm: () => void;
-  initializeFromHash: () => "signin" | "signup" | undefined;
 };
 
 export type TAuthStore = TAuthState & TAuthActions;
