@@ -34,13 +34,13 @@ import { useMemo } from 'react'
 
 interface WeekViewProps {
   currentDate: Date
-  events: CalendarEvent[]
-  onEventSelectAction: (event: CalendarEvent) => void
+  events: TCalendarEvent[]
+  onEventSelectAction: (event: TCalendarEvent) => void
   onEventCreateAction: (startTime: Date) => void
 }
 
 interface PositionedEvent {
-  event: CalendarEvent
+  event: TCalendarEvent
   top: number
   height: number
   left: number
@@ -76,12 +76,12 @@ export function WeekView({
       .filter((event) => {
         // Include explicitly marked all-day events or multi-day events
         return (
-          event.allDay || isMultiDayEvent(event as unknown as TCalendarEvent)
+          event.start.date || isMultiDayEvent(event as unknown as TCalendarEvent)
         )
       })
       .filter((event) => {
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+        const eventStart = new Date(event.start.date || event.start.dateTime || "")
+        const eventEnd = new Date(event.end.date || event.end.dateTime || "")
         return days.some(
           (day) =>
             isSameDay(day, eventStart) ||
@@ -97,13 +97,13 @@ export function WeekView({
       const dayEvents = events.filter((event) => {
         // Skip all-day events and multi-day events
         if (
-          event.allDay ||
+          event.start.dateTime ||
           isMultiDayEvent(event as unknown as TCalendarEvent)
         ) {
           return false
         }
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+        const eventStart = new Date(event.start.dateTime || event.start.date || "")
+        const eventEnd = new Date(event.end.dateTime || event.end.date || "")
         // Check if event is on this day
         return (
           isSameDay(day, eventStart) ||
@@ -113,10 +113,10 @@ export function WeekView({
       })
       // Sort events by start time and duration
       const sortedEvents = [...dayEvents].sort((a, b) => {
-        const aStart = new Date(a.start)
-        const bStart = new Date(b.start)
-        const aEnd = new Date(a.end)
-        const bEnd = new Date(b.end)
+        const aStart = new Date(a.start.dateTime || a.start.date || "")
+        const bStart = new Date(b.start.dateTime || b.start.date || "")
+        const aEnd = new Date(a.end.dateTime || a.end.date || "")
+        const bEnd = new Date(b.end.dateTime || b.end.date || "")
         // First sort by start time
         if (aStart < bStart) {
           return -1
@@ -133,10 +133,10 @@ export function WeekView({
       const positionedEvents: PositionedEvent[] = []
       const dayStart = startOfDay(day)
       // Track columns for overlapping events
-      const columns: { event: CalendarEvent; end: Date }[][] = []
+      const columns: { event: TCalendarEvent; end: Date }[][] = []
       for (const event of sortedEvents) {
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+        const eventStart = new Date(event.start.dateTime || event.start.date || "")
+        const eventEnd = new Date(event.end.dateTime || event.end.date || "")
         // Adjust start and end times if they're outside this day
         const adjustedStart = isSameDay(day, eventStart) ? eventStart : dayStart
         const adjustedEnd = isSameDay(day, eventEnd)
@@ -162,8 +162,8 @@ export function WeekView({
               areIntervalsOverlapping(
                 { start: adjustedStart, end: adjustedEnd },
                 {
-                  start: new Date(c.event.start),
-                  end: new Date(c.event.end),
+                  start: new Date(c.event.start.dateTime || c.event.start.date || ""),
+                  end: new Date(c.event.end.dateTime || c.event.end.date || ""),
                 }
               )
             )
@@ -194,7 +194,7 @@ export function WeekView({
     })
     return result
   }, [days, events])
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: TCalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelectAction(event)
   }
@@ -236,8 +236,8 @@ export function WeekView({
             </div>
             {days.map((day, dayIndex) => {
               const dayAllDayEvents = allDayEvents.filter((event) => {
-                const eventStart = new Date(event.start)
-                const eventEnd = new Date(event.end)
+                const eventStart = new Date(event.start.dateTime || event.start.date || "")
+                const eventEnd = new Date(event.end.dateTime || event.end.date || "")
                 return (
                   isSameDay(day, eventStart) ||
                   (day > eventStart && day < eventEnd) ||
@@ -251,8 +251,8 @@ export function WeekView({
                   key={day.toString()}
                 >
                   {dayAllDayEvents.map((event) => {
-                    const eventStart = new Date(event.start)
-                    const eventEnd = new Date(event.end)
+                    const eventStart = new Date(event.start.dateTime || event.start.date || "")
+                    const eventEnd = new Date(event.end.dateTime || event.end.date || "")
                     const isFirstDay = isSameDay(day, eventStart)
                     const isLastDay = isSameDay(day, eventEnd)
                     // Check if this is the first day in the current week view
@@ -276,7 +276,7 @@ export function WeekView({
                             !shouldShowTitle && 'invisible'
                           )}
                         >
-                          {event.title}
+                          {event.summary}
                         </div>
                       </EventItem>
                     )
@@ -311,9 +311,10 @@ export function WeekView({
           >
             {/* Positioned events */}
             {(processedDayEvents[dayIndex] ?? []).map((positionedEvent) => (
-              <button
-                aria-label={`Abrir evento: ${positionedEvent.event.title}`}
-                className="absolute z-10 h-full w-full px-0.5"
+              <div
+                role="button"
+                aria-label={`Abrir evento: ${positionedEvent.event.summary}`}
+                className="absolute z-10 w-full px-0.5"
                 key={positionedEvent.event.id}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
@@ -334,7 +335,6 @@ export function WeekView({
                   zIndex: positionedEvent.zIndex,
                 }}
                 tabIndex={0}
-                type="button"
               >
                 <div className="pointer-events-none h-full w-full">
                   <DraggableEvent
@@ -345,7 +345,7 @@ export function WeekView({
                     view="week"
                   />
                 </div>
-              </button>
+              </div>
             ))}
             {/* Current time indicator - only show for today's column */}
             {currentTimeVisible && isToday(day) && (
@@ -375,11 +375,11 @@ export function WeekView({
                           'absolute h-[calc(var(--week-cells-height)/4)] w-full',
                           quarter === 0 && 'top-0',
                           quarter === 1 &&
-                            'top-[calc(var(--week-cells-height)/4)]',
+                          'top-[calc(var(--week-cells-height)/4)]',
                           quarter === 2 &&
-                            'top-[calc(var(--week-cells-height)/4*2)]',
+                          'top-[calc(var(--week-cells-height)/4*2)]',
                           quarter === 3 &&
-                            'top-[calc(var(--week-cells-height)/4*3)]'
+                          'top-[calc(var(--week-cells-height)/4*3)]'
                         )}
                         date={day}
                         id={`week-cell-${day.toISOString()}-${quarterHourTime}`}

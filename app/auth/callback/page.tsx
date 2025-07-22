@@ -12,30 +12,20 @@ export default function AuthCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isProcessing, setIsProcessing] = useState(true)
-
   useEffect(() => {
     const handleCallback = () => {
       try {
         const success = searchParams.get('success')
         const error = searchParams.get('error')
         const token = searchParams.get('token')
-
         if (success === 'true' && token) {
-          // Sucesso na autenticação
           toast.success('Login realizado com sucesso!')
-
-          // Armazenar o token se necessário (dependendo da implementação do Better Auth)
           if (token) {
-            // O Better Auth pode gerenciar cookies automaticamente
-            document.cookie = `better-auth.session_token=${token}; path=/; secure; samesite=strict`
+            localStorage.setItem('auth_token', token)
           }
-
-          // Redirecionar para o dashboard
           router.push('/dashboard')
         } else if (error) {
-          // Erro na autenticação
           let errorMessage = 'Erro na autenticação'
-
           switch (error) {
             case 'invalid_session':
               errorMessage = 'Sessão inválida'
@@ -50,39 +40,32 @@ export default function AuthCallbackPage() {
               errorMessage = 'Erro desconhecido na autenticação'
               break
           }
-
           toast.error('Erro no login', {
             description: errorMessage,
           })
-
-          // Redirecionar para a página de login após alguns segundos
-          setTimeout(() => {
-            router.push('/auth/signin')
-          }, 3000)
+          // setTimeout(() => {
+          //   router.push('/auth/login')
+          // }, 3000)
         } else {
-          // Parâmetros inválidos
           toast.error('Erro no callback', {
             description: 'Parâmetros de callback inválidos',
           })
-
-          setTimeout(() => {
-            router.push('/auth/signin')
-          }, 3000)
+          // setTimeout(() => {
+          //   router.push('/auth/login')
+          // }, 3000)
         }
       } catch {
         toast.error('Erro no processamento', {
           description:
             'Ocorreu um erro ao processar o callback de autenticação',
         })
-
-        setTimeout(() => {
-          router.push('/auth/signin')
-        }, 3000)
+        // setTimeout(() => {
+        //   router.push('/auth/login')
+        // }, 3000)
       } finally {
         setIsProcessing(false)
       }
     }
-
     handleCallback()
   }, [searchParams, router])
 

@@ -34,10 +34,10 @@ export default function Page() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth/signin">
+            <Link href="/auth/login">
               <Button variant="ghost">Entrar</Button>
             </Link>
-            <Link href="/auth/signup">
+            <Link href="/auth/register">
               <Button>Começar Agora</Button>
             </Link>
           </div>
@@ -67,13 +67,13 @@ export default function Page() {
           </p>
 
           <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/auth/signup">
+            <Link href="/auth/register">
               <Button className="px-8 py-6 text-lg" size="lg">
                 Começar Gratuitamente
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/auth/signin">
+            <Link href="/auth/login">
               <Button className="px-8 py-6 text-lg" size="lg" variant="outline">
                 Já tenho conta
               </Button>
@@ -312,7 +312,7 @@ export default function Page() {
               Zenithly. Comece gratuitamente hoje mesmo e veja a diferença.
             </p>
             <div className="mb-12 flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="/auth/signup">
+              <Link href="/auth/register">
                 <Button
                   className="px-12 py-6 text-lg shadow-lg transition-all duration-300 hover:shadow-xl"
                   size="lg"
@@ -321,7 +321,7 @@ export default function Page() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/auth/signin">
+              <Link href="/auth/login">
                 <Button
                   className="px-12 py-6 text-lg shadow-lg transition-all duration-300 hover:shadow-xl"
                   size="lg"

@@ -38,8 +38,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 interface MonthViewProps {
   currentDate: Date
-  events: CalendarEvent[]
-  onEventSelectAction: (event: CalendarEvent) => void
+  events: TCalendarEvent[]
+  onEventSelectAction: (event: TCalendarEvent) => void
   onEventCreateAction: (startTime: Date) => void
 }
 
@@ -54,7 +54,6 @@ export function MonthView({
     const monthEnd = endOfMonth(monthStart)
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 })
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 })
-
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd })
   }, [currentDate])
 
@@ -75,11 +74,10 @@ export function MonthView({
         week = []
       }
     }
-
     return result
   }, [days])
 
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: TCalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelectAction(event)
   }
@@ -93,6 +91,7 @@ export function MonthView({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
 
   return (
     <div className="contents" data-slot="month-view">
@@ -114,25 +113,23 @@ export function MonthView({
           >
             {week.map((day, dayIndex) => {
               if (!day) {
-                return null // Skip if day is undefined
+                return null
               }
-
               const dayEvents = getEventsForDay(
-                events as unknown as TCalendarEvent[],
+                events,
                 day
               )
               const spanningEvents = getSpanningEventsForDay(
-                events as unknown as TCalendarEvent[],
+                events,
                 day
               )
               const isCurrentMonth = isSameMonth(day, currentDate)
               const cellId = `month-cell-${day.toISOString()}`
               const allDayEvents = [...spanningEvents, ...dayEvents]
               const allEvents = getAllEventsForDay(
-                events as unknown as TCalendarEvent[],
+                events,
                 day
               )
-
               const isReferenceCell = weekIndex === 0 && dayIndex === 0
               const visibleCount = isMounted
                 ? getVisibleEventCount(allDayEvents.length)
@@ -177,14 +174,11 @@ export function MonthView({
                         const eventEnd = new Date(dateEnd)
                         const isFirstDay = isSameDay(day, eventStart)
                         const isLastDay = isSameDay(day, eventEnd)
-
                         const isHidden =
                           isMounted && visibleCount && index >= visibleCount
-
                         if (!visibleCount) {
                           return null
                         }
-
                         if (!isFirstDay) {
                           return (
                             <div
@@ -195,32 +189,31 @@ export function MonthView({
                                 .slice(0, 10)}`}
                             >
                               <EventItem
-                                event={event as unknown as CalendarEvent}
+                                event={event}
                                 isFirstDay={isFirstDay}
                                 isLastDay={isLastDay}
                                 onClick={(e) =>
                                   handleEventClick(
-                                    event as unknown as CalendarEvent,
+                                    event,
                                     e
                                   )
                                 }
                                 view="month"
                               >
                                 <div aria-hidden={true} className="invisible">
-                                  {/* {!event.allDay && (
+                                  {event.start.date && (
                                     <span>
-                                      {format(new Date(event.start), "h:mm", {
+                                      {format(new Date(event.start.date || ''), "h:mm", {
                                         locale: ptBR,
                                       })}{" "}
                                     </span>
-                                  )} */}
+                                  )}
                                   {event.summary}
                                 </div>
                               </EventItem>
                             </div>
                           )
                         }
-
                         return (
                           <div
                             aria-hidden={isHidden ? 'true' : undefined}
@@ -228,12 +221,12 @@ export function MonthView({
                             key={event.id}
                           >
                             <DraggableEvent
-                              event={event as unknown as CalendarEvent}
+                              event={event}
                               isFirstDay={isFirstDay}
                               isLastDay={isLastDay}
                               onClick={(e) =>
                                 handleEventClick(
-                                  event as unknown as CalendarEvent,
+                                  event,
                                   e
                                 )
                               }
@@ -282,16 +275,15 @@ export function MonthView({
                                   const eventEnd = new Date(dateEnd)
                                   const isFirstDay = isSameDay(day, eventStart)
                                   const isLastDay = isSameDay(day, eventEnd)
-
                                   return (
                                     <EventItem
-                                      event={event as unknown as CalendarEvent}
+                                      event={event}
                                       isFirstDay={isFirstDay}
                                       isLastDay={isLastDay}
                                       key={event.id}
                                       onClick={(e) =>
                                         handleEventClick(
-                                          event as unknown as CalendarEvent,
+                                          event,
                                           e
                                         )
                                       }

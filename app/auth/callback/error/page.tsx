@@ -60,7 +60,7 @@ export default function AuthErrorPage() {
           <div className="grid w-full grid-cols-1 gap-2">
             <Button
               className="w-full"
-              onClick={() => router.push('/auth/signin')}
+              onClick={() => router.push('/auth/login')}
             >
               Tentar Novamente
             </Button>

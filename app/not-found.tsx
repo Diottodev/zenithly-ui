@@ -39,7 +39,7 @@ export default function NotFound() {
               asChild
               className="group w-full transition-all duration-200 hover:scale-[1.02]"
             >
-              <Link href="/auth/signin">
+              <Link href="/auth/login">
                 <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12" />
                 Fazer Login
               </Link>
@@ -49,7 +49,7 @@ export default function NotFound() {
               className="group w-full transition-all duration-200 hover:scale-[1.02]"
               variant="outline"
             >
-              <Link href="/auth/signup">
+              <Link href="/auth/register">
                 <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
                 Criar Conta
               </Link>

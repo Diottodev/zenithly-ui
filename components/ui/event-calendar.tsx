@@ -45,62 +45,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useCalendarContext } from './calendar-context'
 
-// Utility functions to convert between TCalendarEvent and CalendarEvent
-const convertTCalendarEventToCalendarEvent = (
-  event: TCalendarEvent
-): CalendarEvent => {
-  console.log(event._color, 'COLLORR') // Debug log
-  // Ensure _color is always defined
 
-  const dateStart = String(event.start.dateTime || event.start.date)
-  const dateEnd = String(event.end.dateTime || event.end.date)
-  return {
-    id: event.id,
-    title: event.summary || 'Sem título',
-    description: event.description,
-    start: new Date(dateStart),
-    end: new Date(dateEnd),
-    allDay: false, // Google Calendar events with dateTime are not all-day
-    location: event.location,
-    // Default color since TCalendarEvent doesn't have color
-    _color: event._color as { background: string; foreground: string }, // Ensure color is always defined
-  }
-}
-
-const convertCalendarEventToTCalendarEvent = (
-  event: CalendarEvent
-): TCalendarEvent => {
-  const now = new Date().toISOString()
-  return {
-    id: event.id,
-    kind: 'calendar#event',
-    status: 'confirmed',
-    htmlLink: '',
-    summary: event.title,
-    description: event.description,
-    location: event.location,
-    start: {
-      dateTime: event.start.toISOString(),
-    },
-    end: {
-      dateTime: event.end.toISOString(),
-    },
-    created: now,
-    updated: now,
-    creator: {
-      email: '',
-      displayName: 'User',
-      self: true,
-    },
-    organizer: {
-      email: '',
-      displayName: 'User',
-      self: true,
-    },
-  }
-}
 
 export interface EventCalendarProps {
   events?: TCalendarEvent[]
@@ -119,16 +65,12 @@ export function EventCalendar({
   className,
   initialView = 'month',
 }: EventCalendarProps) {
-  // Convert TCalendarEvent[] to CalendarEvent[] for internal use
-  const internalEvents = events.map(convertTCalendarEventToCalendarEvent)
-
-  // Use the shared calendar context instead of local state
-  const { currentDate, setCurrentDate } = useCalendarContext()
+  const internalEvents = events
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<TCalendarEvent | null>(null)
   const { open } = useSidebar()
-
   // Add keyboard shortcuts for view switching
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -142,7 +84,6 @@ export function EventCalendar({
       ) {
         return
       }
-
       switch (e.key.toLowerCase()) {
         case 'm':
           setView('month')
@@ -157,13 +98,10 @@ export function EventCalendar({
           setView('agenda')
           break
         default:
-          // Do nothing for other keys
           break
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
@@ -199,14 +137,12 @@ export function EventCalendar({
     setCurrentDate(new Date())
   }
 
-  const handleEventSelect = (event: CalendarEvent) => {
-    console.log('Event selected:', event) // Debug log
+  const handleEventSelect = (event: TCalendarEvent) => {
     setSelectedEvent(event)
     setIsEventDialogOpen(true)
   }
 
   const handleEventCreate = (startTime: Date) => {
-    console.log('Creating new event at:', startTime) // Debug log
     // Snap to 15-minute intervals
     const minutes = startTime.getMinutes()
     const remainder = minutes % 15
@@ -222,25 +158,49 @@ export function EventCalendar({
       startTime.setMilliseconds(0)
     }
 
-    const newEvent: CalendarEvent = {
+    const newEvent: TCalendarEvent = {
       id: '',
-      title: '',
-      start: startTime,
-      end: addHoursToDate(startTime, 1),
-      allDay: false,
+      summary: '',
+      start: {
+        dateTime: startTime.toISOString(),
+        date: startTime.toISOString().split('T')[0],
+      },
+      end: {
+        dateTime: addHoursToDate(startTime, 1).toISOString(),
+        date: addHoursToDate(startTime, 1).toISOString().split('T')[0],
+      },
+      kind: '',
+      status: '',
+      htmlLink: '',
+      created: '',
+      updated: '',
+      creator: {
+        email: '',
+        displayName: undefined,
+        self: undefined
+      },
+      organizer: {
+        email: '',
+        displayName: undefined,
+        self: undefined
+      }
     }
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
   }
 
-  const handleEventSave = (event: CalendarEvent) => {
+  const handleEventSave = (event: TCalendarEvent) => {
     if (event.id) {
-      onEventUpdate?.(convertCalendarEventToTCalendarEvent(event))
+      onEventUpdate?.(event)
       // Show toast notification when an event is updated
-      toast(`Evento "${event.title}" atualizado`, {
-        description: format(new Date(event.start), 'dd/MM/yyyy', {
-          locale: ptBR,
-        }),
+      toast(`Evento "${event.summary}" atualizado`, {
+        description: format(
+          new Date(event.start.dateTime ?? event.start.date ?? ''),
+          'dd/MM/yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
         position: 'bottom-left',
       })
     } else {
@@ -248,10 +208,10 @@ export function EventCalendar({
         ...event,
         id: Math.random().toString(36).substring(2, 11),
       }
-      onEventAdd?.(convertCalendarEventToTCalendarEvent(newCalendarEvent))
+      onEventAdd?.(event)
       // Show toast notification when an event is added
-      toast(`Evento "${event.title}" adicionado`, {
-        description: format(new Date(event.start), 'dd/MM/yyyy', {
+      toast(`Evento "${event.summary}" adicionado`, {
+        description: format(new Date(event.start.dateTime ?? event.start.date ?? ''), 'dd/MM/yyyy', {
           locale: ptBR,
         }),
         position: 'bottom-left',
@@ -284,11 +244,11 @@ export function EventCalendar({
     }
   }
 
-  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    onEventUpdate?.(convertCalendarEventToTCalendarEvent(updatedEvent))
+  const handleEventUpdate = (updatedEvent: TCalendarEvent) => {
+    onEventUpdate?.(updatedEvent)
     // Show toast notification when an event is updated via drag and drop
-    toast(`Evento "${updatedEvent.title}" movido`, {
-      description: format(new Date(updatedEvent.start), 'dd/MM/yyyy', {
+    toast(`Evento "${updatedEvent.summary}" movido`, {
+      description: format(new Date(updatedEvent.start.dateTime ?? updatedEvent.start.date ?? ''), 'dd/MM/yyyy', {
         locale: ptBR,
       }),
       position: 'bottom-left',
@@ -328,7 +288,6 @@ export function EventCalendar({
       // Show the month range for agenda view
       const start = currentDate
       const end = addDays(currentDate, AgendaDaysToShow - 1)
-
       if (isSameMonth(start, end)) {
         return format(start, 'MMMM yyyy', { locale: ptBR })
       }
@@ -364,7 +323,7 @@ export function EventCalendar({
                 data-state={open ? 'invisible' : 'visible'}
               />
               <h2 className="lg:peer-data-[state=invisible]:-translate-x-7.5 font-semibold text-xl transition-transform duration-300 ease-in-out">
-                {viewTitle.toString().toLowerCase()}
+                {view === 'day' ? viewTitle : viewTitle.toString().toLowerCase()}
               </h2>
             </div>
           </div>
@@ -449,41 +408,37 @@ export function EventCalendar({
             </div>
           </div>
         </div>
-
-        <div className="flex flex-1 flex-col">
-          {view === 'month' && (
-            <MonthView
-              currentDate={currentDate}
-              events={internalEvents}
-              onEventCreateAction={handleEventCreate}
-              onEventSelectAction={handleEventSelect}
-            />
-          )}
-          {view === 'week' && (
-            <WeekView
-              currentDate={currentDate}
-              events={internalEvents}
-              onEventCreateAction={handleEventCreate}
-              onEventSelectAction={handleEventSelect}
-            />
-          )}
-          {view === 'day' && (
-            <DayView
-              currentDate={currentDate}
-              events={internalEvents}
-              onEventCreateAction={handleEventCreate}
-              onEventSelectAction={handleEventSelect}
-            />
-          )}
-          {view === 'agenda' && (
-            <AgendaView
-              currentDate={currentDate}
-              events={internalEvents}
-              onEventSelectAction={handleEventSelect}
-            />
-          )}
-        </div>
-
+        {view === 'month' && (
+          <MonthView
+            currentDate={currentDate}
+            events={internalEvents}
+            onEventCreateAction={handleEventCreate}
+            onEventSelectAction={handleEventSelect}
+          />
+        )}
+        {view === 'week' && (
+          <WeekView
+            currentDate={currentDate}
+            events={internalEvents}
+            onEventCreateAction={handleEventCreate}
+            onEventSelectAction={handleEventSelect}
+          />
+        )}
+        {view === 'day' && (
+          <DayView
+            currentDate={currentDate}
+            events={internalEvents}
+            onEventCreateAction={handleEventCreate}
+            onEventSelectAction={handleEventSelect}
+          />
+        )}
+        {view === 'agenda' && (
+          <AgendaView
+            currentDate={currentDate}
+            events={internalEvents}
+            onEventSelectAction={handleEventSelect}
+          />
+        )}
         <EventDialog
           event={selectedEvent}
           isOpen={isEventDialogOpen}

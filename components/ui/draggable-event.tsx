@@ -1,13 +1,14 @@
 'use client'
 
 import { type CalendarEvent, EventItem, useCalendarDnd } from '$/components/ui'
+import type { TCalendarEvent } from '$/types/google-calendar'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { differenceInDays } from 'date-fns'
 import { useRef, useState } from 'react'
 
 interface DraggableEventProps {
-  event: CalendarEvent
+  event: TCalendarEvent
   view: 'month' | 'week' | 'day'
   showTime?: boolean
   onClick?: (e: React.MouseEvent) => void
@@ -37,12 +38,11 @@ export function DraggableEvent({
     x: number
     y: number
   } | null>(null)
-
   // Check if this is a multi-day event
-  const eventStart = new Date(event.start)
-  const eventEnd = new Date(event.end)
+  const eventStart = new Date(event.start.dateTime || event.start.date || '')
+  const eventEnd = new Date(event.end.dateTime || event.end.date || '')
   const isMultiDayEvent =
-    isMultiDay || event.allDay || differenceInDays(eventEnd, eventStart) >= 1
+    isMultiDay || differenceInDays(eventEnd, eventStart) >= 1
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -83,16 +83,16 @@ export function DraggableEvent({
 
   const style = transform
     ? {
-        transform: CSS.Translate.toString(transform),
-        height: height || 'auto',
-        width:
-          isMultiDayEvent && multiDayWidth ? `${multiDayWidth}%` : undefined,
-      }
+      transform: CSS.Translate.toString(transform),
+      height: height || 'auto',
+      width:
+        isMultiDayEvent && multiDayWidth ? `${multiDayWidth}%` : undefined,
+    }
     : {
-        height: height || 'auto',
-        width:
-          isMultiDayEvent && multiDayWidth ? `${multiDayWidth}%` : undefined,
-      }
+      height: height || 'auto',
+      width:
+        isMultiDayEvent && multiDayWidth ? `${multiDayWidth}%` : undefined,
+    }
 
   // Handle touch start to track where on the event the user touched
   const handleTouchStart = (e: React.TouchEvent) => {

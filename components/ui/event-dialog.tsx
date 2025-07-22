@@ -35,16 +35,17 @@ import {
 } from '$/components/ui/select'
 import { Textarea } from '$/components/ui/textarea'
 import { cn } from '$/lib/utils'
+import type { TCalendarEvent, TEventColor } from '$/types/google-calendar'
 import { RiCalendarLine, RiDeleteBinLine } from '@remixicon/react'
 import { format, isBefore } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 interface EventDialogProps {
-  event: CalendarEvent | null
+  event: TCalendarEvent | null
   isOpen: boolean
   onCloseAction: () => void
-  onSaveAction: (event: CalendarEvent) => void
+  onSaveAction: (event: TCalendarEvent) => void
   onDeleteAction: (eventId: string) => void
 }
 
@@ -61,19 +62,12 @@ export function EventDialog({
   const [endDate, setEndDate] = useState<Date>(new Date())
   const [startTime, setStartTime] = useState(`${DefaultStartHour}:00`)
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
-  const [allDay, setAllDay] = useState(false)
+  const [allDay, setAllDay] = useState(event?.start.date ? true : event?.start.dateTime ? false : false)
   const [location, setLocation] = useState('')
-  const [color, setColor] = useState<EventColor>(
-    (event?._color as EventColor) || 'blue'
-  )
+  const [color, setColor] = useState<EventColor>('blue')
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
-
-  // Debug log to check what event is being passed
-  useEffect(() => {
-    console.log('EventDialog received event:', event)
-  }, [event])
 
   const resetForm = useCallback(() => {
     setTitle('')
@@ -96,19 +90,19 @@ export function EventDialog({
 
   useEffect(() => {
     if (event) {
-      setTitle(event.title || '')
+      setTitle(event.summary || '')
       setDescription(event.description || '')
 
-      const start = new Date(event.start)
-      const end = new Date(event.end)
+      const start = new Date(event.start.dateTime || event.start.date || "")
+      const end = new Date(event.end.dateTime || event.end.date || "")
 
       setStartDate(start)
       setEndDate(end)
       setStartTime(formatTimeForInput(start))
       setEndTime(formatTimeForInput(end))
-      setAllDay(event.allDay ?? false)
+      setAllDay(Boolean(event.start.date) ?? false)
       setLocation(event.location || '')
-      setColor(event._color as EventColor)
+      setColor(event._color as unknown as EventColor)
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
@@ -172,13 +166,33 @@ export function EventDialog({
 
     onSaveAction({
       id: event?.id || '',
-      title: eventTitle,
+      summary: eventTitle,
       description,
-      start,
-      end,
-      allDay,
+      start: {
+        date: allDay ? start.toISOString().split('T')[0] : undefined,
+        dateTime: allDay ? undefined : start.toISOString(),
+      },
+      end: {
+        date: allDay ? end.toISOString().split('T')[0] : undefined,
+        dateTime: allDay ? undefined : end.toISOString(),
+      },
       location,
-      _color: color,
+      _color: color as unknown as TEventColor,
+      kind: '',
+      status: '',
+      htmlLink: '',
+      created: '',
+      updated: '',
+      creator: {
+        email: '',
+        displayName: undefined,
+        self: undefined
+      },
+      organizer: {
+        email: '',
+        displayName: undefined,
+        self: undefined
+      }
     })
   }
 
@@ -195,37 +209,37 @@ export function EventDialog({
     bgClass: string
     borderClass: string
   }> = [
-    {
-      value: 'blue',
-      label: 'Blue',
-      bgClass: 'bg-blue-400 data-[state=checked]:bg-blue-400',
-      borderClass: 'border-blue-400 data-[state=checked]:border-blue-400',
-    },
-    {
-      value: 'violet',
-      label: 'Violet',
-      bgClass: 'bg-violet-400 data-[state=checked]:bg-violet-400',
-      borderClass: 'border-violet-400 data-[state=checked]:border-violet-400',
-    },
-    {
-      value: 'rose',
-      label: 'Rose',
-      bgClass: 'bg-rose-400 data-[state=checked]:bg-rose-400',
-      borderClass: 'border-rose-400 data-[state=checked]:border-rose-400',
-    },
-    {
-      value: 'emerald',
-      label: 'Emerald',
-      bgClass: 'bg-emerald-400 data-[state=checked]:bg-emerald-400',
-      borderClass: 'border-emerald-400 data-[state=checked]:border-emerald-400',
-    },
-    {
-      value: 'orange',
-      label: 'Orange',
-      bgClass: 'bg-orange-400 data-[state=checked]:bg-orange-400',
-      borderClass: 'border-orange-400 data-[state=checked]:border-orange-400',
-    },
-  ]
+      {
+        value: 'blue',
+        label: 'Blue',
+        bgClass: 'bg-blue-400 data-[state=checked]:bg-blue-400',
+        borderClass: 'border-blue-400 data-[state=checked]:border-blue-400',
+      },
+      {
+        value: 'violet',
+        label: 'Violet',
+        bgClass: 'bg-violet-400 data-[state=checked]:bg-violet-400',
+        borderClass: 'border-violet-400 data-[state=checked]:border-violet-400',
+      },
+      {
+        value: 'rose',
+        label: 'Rose',
+        bgClass: 'bg-rose-400 data-[state=checked]:bg-rose-400',
+        borderClass: 'border-rose-400 data-[state=checked]:border-rose-400',
+      },
+      {
+        value: 'emerald',
+        label: 'Emerald',
+        bgClass: 'bg-emerald-400 data-[state=checked]:bg-emerald-400',
+        borderClass: 'border-emerald-400 data-[state=checked]:border-emerald-400',
+      },
+      {
+        value: 'orange',
+        label: 'Orange',
+        bgClass: 'bg-orange-400 data-[state=checked]:bg-orange-400',
+        borderClass: 'border-orange-400 data-[state=checked]:border-orange-400',
+      },
+    ]
 
   return (
     <Dialog onOpenChange={(open) => !open && onCloseAction()} open={isOpen}>

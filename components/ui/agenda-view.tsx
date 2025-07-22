@@ -14,8 +14,8 @@ import { useMemo } from 'react'
 
 interface AgendaViewProps {
   currentDate: Date
-  events: CalendarEvent[]
-  onEventSelectAction: (event: CalendarEvent) => void
+  events: TCalendarEvent[]
+  onEventSelectAction: (event: TCalendarEvent) => void
 }
 
 export function AgendaView({
@@ -30,7 +30,7 @@ export function AgendaView({
     )
   }, [currentDate])
 
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: TCalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelectAction(event)
   }
@@ -50,11 +50,9 @@ export function AgendaView({
             events as unknown as TCalendarEvent[],
             day
           )
-
           if (dayEvents.length === 0) {
             return null
           }
-
           return (
             <div
               className="relative my-12 border-border/70 border-t"
@@ -69,10 +67,10 @@ export function AgendaView({
               <div className="mt-6 space-y-2">
                 {dayEvents.map((event) => (
                   <EventItem
-                    event={event as unknown as CalendarEvent}
+                    event={event}
                     key={event.id}
                     onClick={(e) =>
-                      handleEventClick(event as unknown as CalendarEvent, e)
+                      handleEventClick(event, e)
                     }
                     view="agenda"
                   />

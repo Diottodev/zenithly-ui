@@ -33,13 +33,13 @@ export function DroppableCell({
   const formattedTime =
     time !== undefined
       ? `${Math.floor(time)}:${Math.round((time - Math.floor(time)) * 60)
-          .toString()
-          .padStart(2, '0')}`
+        .toString()
+        .padStart(2, '0')}`
       : null
   return (
     <button
       className={cn(
-        'flex h-full flex-col px-0.5 py-1 data-dragging:bg-accent sm:px-1',
+        'flex h-full min-w-[95%] max-w-[99%] flex-col px-0.5 py-1 data-dragging:bg-accent sm:px-1',
         className
       )}
       data-dragging={isOver && activeEvent ? true : undefined}

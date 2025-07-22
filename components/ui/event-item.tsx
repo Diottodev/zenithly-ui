@@ -1,7 +1,7 @@
 'use client'
 
-import type { CalendarEvent } from '$/components/ui'
 import { cn } from '$/lib/utils'
+import type { TCalendarEvent } from '$/types/google-calendar'
 import { getBorderRadiusClasses } from '$/utils/get-border-radius-classes'
 import { getEventColorClasses } from '$/utils/get-event-color-classes'
 import type { DraggableAttributes } from '@dnd-kit/core'
@@ -18,7 +18,7 @@ const formatTimeWithOptionalMinutes = (date: Date) => {
 }
 
 interface EventWrapperProps {
-  event: CalendarEvent
+  event: TCalendarEvent
   isFirstDay?: boolean
   isLastDay?: boolean
   isDragging?: boolean
@@ -50,25 +50,17 @@ function EventWrapper({
   // Always use the currentTime (if provided) to determine if the event is in the past
   const displayEnd = currentTime
     ? new Date(
-        new Date(currentTime).getTime() +
-          (new Date(event.end).getTime() - new Date(event.start).getTime())
-      )
-    : new Date(event.end)
+      new Date(currentTime).getTime() +
+      (new Date(event.end.dateTime || event.end.date || "").getTime() - new Date(event.start.dateTime || event.start.date || "").getTime())
+    )
+    : new Date(event.end.dateTime || event.end.date || "")
 
   const isEventInPast = isPast(displayEnd)
-  console.log(
-    getEventColorClasses(
-      event._color as { background: string; foreground: string }
-    ),
-    getBorderRadiusClasses(isFirstDay, isLastDay),
-    'LOG DEBUG'
-  )
-
   return (
-    <button
+    <div
       className={cn(
-        'flex h-full w-full select-none overflow-hidden px-1 text-left font-medium outline-none backdrop-blur-md transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-dragging:cursor-grabbing data-past-event:line-through data-dragging:shadow-lg sm:px-2',
-        getBorderRadiusClasses(isFirstDay, isLastDay),
+        'flex select-none overflow-hidden px-1 text-left font-medium outline-none backdrop-blur-md transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-dragging:cursor-pointer data-past-event:line-through data-dragging:shadow-lg sm:px-2',
+        getBorderRadiusClasses(isFirstDay, isLastDay, Boolean(event.start.date)),
         className
       )}
       data-dragging={isDragging || undefined}
@@ -88,12 +80,12 @@ function EventWrapper({
       {...dndAttributes}
     >
       {children}
-    </button>
+    </div>
   )
 }
 
 interface EventItemProps {
-  event: CalendarEvent
+  event: TCalendarEvent
   view: 'month' | 'week' | 'day' | 'agenda'
   isDragging?: boolean
   onClick?: (e: React.MouseEvent) => void
@@ -121,7 +113,7 @@ function AgendaEventItem({
   dndListeners,
   dndAttributes,
 }: {
-  event: CalendarEvent
+  event: TCalendarEvent
   eventColor: unknown
   displayStart: Date
   displayEnd: Date
@@ -141,16 +133,16 @@ function AgendaEventItem({
         ),
         className
       )}
-      data-past-event={isPast(new Date(event.end)) || undefined}
+      data-past-event={isPast(new Date(event.end.dateTime || event.end.date || "")) || undefined}
       onClick={onClick}
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
       {...dndListeners}
       {...dndAttributes}
     >
-      <div className="font-medium text-sm">{event.title}</div>
+      <div className="font-medium text-sm">{event.summary}</div>
       <div className="text-xs opacity-70">
-        {event.allDay ? (
+        {event.start.date ? (
           <span>All day</span>
         ) : (
           <span className="uppercase">
@@ -189,24 +181,18 @@ export function EventItem({
   onTouchStart,
 }: EventItemProps) {
   const eventColor = event._color
-  console.log(
-    'color',
-    getEventColorClasses(
-      eventColor as { background: string; foreground: string }
-    )
-  )
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {
-    return currentTime || new Date(event.start)
+    return currentTime || new Date(event.start.dateTime || event.start.date || "")
   }, [currentTime, event.start])
 
   const displayEnd = useMemo(() => {
     return currentTime
       ? new Date(
-          new Date(currentTime).getTime() +
-            (new Date(event.end).getTime() - new Date(event.start).getTime())
-        )
-      : new Date(event.end)
+        new Date(currentTime).getTime() +
+        (new Date(event.end.dateTime || event.end.date || "").getTime() - new Date(event.start.dateTime || event.start.date || "").getTime())
+      )
+      : new Date(event.end.dateTime || event.end.date || "")
   }, [currentTime, event.start, event.end])
 
   // Calculate event duration in minutes
@@ -215,15 +201,13 @@ export function EventItem({
   }, [displayStart, displayEnd])
 
   const getEventTime = () => {
-    if (event.allDay) {
+    if (event.start.date) {
       return 'All day'
     }
-
     // For short events (less than 45 minutes), only show start time
     if (durationMinutes < 45) {
       return formatTimeWithOptionalMinutes(displayStart)
     }
-
     // For longer events, show both start and end time
     return `${formatTimeWithOptionalMinutes(
       displayStart
@@ -234,7 +218,7 @@ export function EventItem({
     return (
       <EventWrapper
         className={cn(
-          'mt-[var(--event-gap)] h-[var(--event-height)] items-center text-[10px] sm:text-[13px]',
+          'p-2 mt-[var(--event-gap)] h-[var(--event-height)] items-center text-[10px] sm:text-[13px]',
           className
         )}
         currentTime={currentTime}
@@ -249,13 +233,13 @@ export function EventItem({
         onTouchStart={onTouchStart}
       >
         {children || (
-          <span className="truncate">
-            {!event.allDay && (
+          <span className="truncate block max-w-full">
+            {!event.start.date && (
               <span className="truncate font-normal uppercase opacity-70 sm:text-xs">
                 {formatTimeWithOptionalMinutes(displayStart)}{' '}
               </span>
             )}
-            {event.title}
+            {event.summary || 'Sem título'}
           </span>
         )}
       </EventWrapper>
@@ -284,7 +268,7 @@ export function EventItem({
       >
         {durationMinutes < 45 ? (
           <div className="truncate">
-            {event.title}{' '}
+            {event.summary || 'Sem título'}{' '}
             {showTime && (
               <span className="opacity-70">
                 {formatTimeWithOptionalMinutes(displayStart)}
@@ -293,7 +277,7 @@ export function EventItem({
           </div>
         ) : (
           <>
-            <div className="truncate font-medium">{event.title}</div>
+            <div className="truncate font-medium">{event.summary || 'Sem título'}</div>
             {showTime && (
               <div className="truncate font-normal uppercase opacity-70 sm:text-xs">
                 {getEventTime()}

@@ -1,6 +1,7 @@
 'use client'
 
 import { type CalendarEvent, EventItem } from '$/components/ui'
+import type { TCalendarEvent } from '$/types/google-calendar'
 import {
   DndContext,
   type DragEndEvent,
@@ -26,7 +27,7 @@ import {
 
 // Define the context type
 type CalendarDndContextType = {
-  activeEvent: CalendarEvent | null
+  activeEvent: TCalendarEvent | null
   activeId: UniqueIdentifier | null
   activeView: 'month' | 'week' | 'day' | null
   currentTime: Date | null
@@ -61,14 +62,14 @@ export const useCalendarDnd = () => useContext(CalendarDndContext)
 // Props for the provider
 interface CalendarDndProviderProps {
   children: ReactNode
-  onEventUpdateAction: (event: CalendarEvent) => void
+  onEventUpdateAction: (event: TCalendarEvent) => void
 }
 
 export function CalendarDndProvider({
   children,
   onEventUpdateAction,
 }: CalendarDndProviderProps) {
-  const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null)
+  const [activeEvent, setActiveEvent] = useState<TCalendarEvent | null>(null)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
   const [activeView, setActiveView] = useState<'month' | 'week' | 'day' | null>(
     null
@@ -130,7 +131,7 @@ export function CalendarDndProvider({
       multiDayWidth: eventMultiDayWidth,
       dragHandlePosition: eventDragHandlePosition,
     } = active.data.current as {
-      event: CalendarEvent
+      event: TCalendarEvent
       view: 'month' | 'week' | 'day'
       height?: number
       isMultiDay?: boolean
@@ -147,7 +148,7 @@ export function CalendarDndProvider({
     setActiveEvent(calendarEvent)
     setActiveId(active.id)
     setActiveView(view)
-    setCurrentTime(new Date(calendarEvent.start))
+    setCurrentTime(new Date(calendarEvent.start.dateTime || calendarEvent.start.date || ''))
     setIsMultiDay(Boolean(eventIsMultiDay))
     setMultiDayWidth(eventMultiDayWidth || null)
     setDragHandlePosition(eventDragHandlePosition || null)
@@ -304,7 +305,7 @@ export function CalendarDndProvider({
       }
 
       const activeData = active.data.current as {
-        event?: CalendarEvent
+        event?: TCalendarEvent
         view?: string
       }
       const overData = over.data.current as { date?: Date; time?: number }
@@ -319,16 +320,16 @@ export function CalendarDndProvider({
 
       const newStart = getNewStartTime(date, time, currentTime)
 
-      const originalStart = new Date(calendarEvent.start)
-      const originalEnd = new Date(calendarEvent.end)
+      const originalStart = new Date(calendarEvent.start.dateTime ?? calendarEvent.start.date ?? '')
+      const originalEnd = new Date(calendarEvent.end.dateTime ?? calendarEvent.end.date ?? '')
       const durationMinutes = differenceInMinutes(originalEnd, originalStart)
       const newEnd = addMinutes(newStart, durationMinutes)
 
       if (hasStartTimeChanged(originalStart, newStart)) {
         onEventUpdateAction({
           ...calendarEvent,
-          start: newStart,
-          end: newEnd,
+          start: { dateTime: newStart.toISOString() },
+          end: { dateTime: newEnd.toISOString() },
         })
       }
     } catch (error) {

@@ -1,51 +1,51 @@
-'use client'
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from '$/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from "$/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '$/components/ui/dropdown-menu'
+} from "$/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '$/components/ui/sidebar'
-import { useAuth } from '$/hooks/use-auth'
-import { signOut } from '$/lib/better-auth-client'
-import { getFirstTwoNames } from '$/utils/get-first-two-names'
-import { getInitialsName } from '$/utils/get-initials-name'
-import { RiMore2Line } from '@remixicon/react'
-import { LogOut, Settings, User } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+} from "$/components/ui/sidebar";
+import { useSession } from "$/hooks/use-auth";
+import { getFirstTwoNames } from "$/utils/get-first-two-names";
+import { getInitialsName } from "$/utils/get-initials-name";
+import { RiMore2Line } from "@remixicon/react";
+import { LogOut, Settings, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function UserMenu() {
-  const router = useRouter()
-  const { user } = useAuth()
-  const { isMobile } = useSidebar()
-
+  const router = useRouter();
+  const { user } = useSession();
+  const { isMobile } = useSidebar();
   if (!user) {
-    return null
+    return null;
   }
-
   const handleSignOut = async () => {
     try {
-      await signOut()
-      toast.success('Logout realizado com sucesso!')
-      router.push('/auth/signin')
+      await fetch(`${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/auth/logout`, {
+        method: "POST",
+      });
+      localStorage.removeItem("auth_token");
+      toast.success("Logout realizado com sucesso!");
+      router.push("/auth/login");
     } catch (error) {
-      toast.error('Erro ao fazer logout', {
+      toast.error("Erro ao fazer logout", {
         description:
-          error instanceof Error ? error.message : 'Erro desconhecido',
-      })
+          error instanceof Error ? error.message : "Erro desconhecido",
+      });
     }
-  }
-  const initials = getInitialsName(user)
-  const isName = getFirstTwoNames(user.name)
+  };
+  const initials = getInitialsName(user);
+  const isName = getFirstTwoNames(user.name);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -56,7 +56,7 @@ export function UserMenu() {
               size="lg"
             >
               <Avatar className="h-8 w-8 transition-[width,height] duration-200 ease-in-out">
-                <AvatarImage alt={user.name || ''} src={user.image || ''} />
+                <AvatarImage alt={user.name || ""} src={user.image || ""} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="ml-3 grid flex-1 text-left text-sm leading-tight">
@@ -73,7 +73,7 @@ export function UserMenu() {
           <DropdownMenuContent
             align="end"
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
+            side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
             <DropdownMenuItem className="gap-3" disabled>
@@ -93,5 +93,5 @@ export function UserMenu() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

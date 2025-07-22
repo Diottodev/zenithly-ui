@@ -1,24 +1,24 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+import { use, useEffect } from 'react'
 import { AnimatedCard } from '$/components/ui/animated-card'
 import { Button } from '$/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '$/components/ui/card'
 import { Icons } from '$/components/ui/icons'
 import Logo from '$/components/ui/logo'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 
 export default function AuthSuccessPage() {
   const router = useRouter()
-
+  const token = useSearchParams().get('token')
   useEffect(() => {
-    // Redirecionar automaticamente após 3 segundos
-    const timer = setTimeout(() => {
+    if (token) {
+      document.cookie = `__Secure-better-auth.session_token=${token}; path=/; domain=.diottodev.com; secure; samesite=none`
       router.push('/dashboard')
-    }, 3000)
-    return () => clearTimeout(timer)
-  }, [router])
-
+    } else {
+      router.push('/auth/login')
+    }
+  }, [])
   return (
     <div className="flex min-h-screen items-center justify-center">
       <AnimatedCard className="mx-auto w-full max-w-md">
@@ -42,9 +42,6 @@ export default function AuthSuccessPage() {
               <span>Redirecionando...</span>
             </div>
           </div>
-          <Button className="w-full" onClick={() => router.push('/dashboard')}>
-            Ir para o Dashboard
-          </Button>
         </CardContent>
       </AnimatedCard>
     </div>

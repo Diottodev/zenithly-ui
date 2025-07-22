@@ -1,8 +1,8 @@
-import { Toaster } from '$/components/ui/sonner'
-// import { AuthProvider } from "$/providers/auth-provider";
-import { ThemeProvider } from '$/providers/theme-provider'
+
+import { AppProviders } from '$/components/app-providers'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+
 
 const fontSans = Geist({
   variable: '--font-sans',
@@ -15,6 +15,7 @@ const fontMono = Geist_Mono({
   subsets: ['latin'],
   display: 'swap',
 })
+
 
 export default function RootLayout({
   children,
@@ -30,15 +31,7 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} bg-sidebar font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   )

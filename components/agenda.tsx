@@ -1,4 +1,3 @@
-import { CalendarProvider } from '$/components/ui/calendar-context'
 import { Skeleton } from '$/components/ui/skeleton'
 import dynamic from 'next/dynamic'
 
@@ -17,9 +16,7 @@ const BigCalendar = dynamic(() => import('$/components/ui/big-calendar'), {
 export default function Agenda() {
   return (
     <div className="w-full">
-      <CalendarProvider>
-        <BigCalendar />
-      </CalendarProvider>
+      <BigCalendar />
     </div>
   )
 }
